@@ -4,6 +4,7 @@
 
 #if defined(ENABLE_ANIMATION)
 #include "earth.h"
+#include "100.h"
 #endif
 MESSAGE Display::_message = MESSAGE::MSG_DO_NOTHING;
 
@@ -95,7 +96,7 @@ void Display::GIFDraw(GIFDRAW *pDraw) {
       if (iCount)  // any opaque pixels?
       {
         for (int xOffset = 0; xOffset < iCount; xOffset++) {
-          videoOut->drawPixel(pDraw->iX + x + xOffset, _textOffset_y + y, usTemp[xOffset]);
+          videoOut->drawPixel(pDraw->iX + x + xOffset + 5, 10 + y + 32, usTemp[xOffset]);
         }
         x += iCount;
         iCount = 0;
@@ -118,7 +119,7 @@ void Display::GIFDraw(GIFDRAW *pDraw) {
     s = pDraw->pPixels;
     // Translate the 8-bit pixels through the RGB565 palette (already byte reversed)
     for (x = 0; x < pDraw->iWidth; x++) {
-      videoOut->drawPixel(_textOffset_x + x, _textOffset_y + y + 32, usPalette[*s++]);
+      videoOut->drawPixel(5 + x, 10 + y + 32, usPalette[*s++]);
     }
   }
 }
@@ -132,7 +133,6 @@ void Display::displayWeatherInfo(void) {
   time.replace("__TIME__", _time);
   videoOut->setTextColor(0xFFFF, _bgTitle);
   videoOut->printEfont(" Osaka Weather Station        ", _textOffset_x, _textOffset_y + 16 * 0, 1);
-  //videoOut->printEfont(time.c_str(), _textOffset_x, _textOffset_y + 16 * 1, 1);
 
   char tempe[10] = {0};
   char humid[10] = {0};
@@ -174,21 +174,20 @@ void Display::setNtpTime(String ntpTime) {
 
 void Display::update() {
 #if defined(ENABLE_ANIMATION)
-  if (gif.open((uint8_t *)earth, 409042, GIFDraw)) {
-    while (gif.playFrame(true, NULL)) {
-      switch (_message) {
-        case MESSAGE::MSG_WRITE_BUFFER:
-          displayWeatherInfo();
-          _message = MESSAGE::MSG_DO_NOTHING;
-          break;
-        default:
-          _message = MESSAGE::MSG_DO_NOTHING;
+  switch (_message) {
+    case MESSAGE::MSG_WRITE_BUFFER:
+      if (gif.open((uint8_t *)_100, 2730, GIFDraw)) {
+        gif.playFrame(true, NULL);
       }
-      videoOut->waitForFrame();
-    }
-    videoOut->waitForFrame();
-    gif.close();
+      gif.close();
+
+      displayWeatherInfo();
+      _message = MESSAGE::MSG_DO_NOTHING;
+      break;
+    default:
+      _message = MESSAGE::MSG_DO_NOTHING;
   }
+  videoOut->waitForFrame();
 #else
   switch (_message) {
     case MESSAGE::MSG_WRITE_BUFFER:
@@ -199,6 +198,6 @@ void Display::update() {
       _message = MESSAGE::MSG_DO_NOTHING;
   }
   videoOut->waitForFrame();
-  delay(1);
 #endif
+  delay(1);
 }
