@@ -79,7 +79,7 @@ class WeatherDisplay {
     ThingSpeak.begin(_client);
 
 #if defined(TEST_PERIOD)
-    _serverChecker.attach(30, _timerCallback);
+    _serverChecker.attach(30, timerCallback);
 #else
     _serverChecker.attach(60 * 10, timerCallback);
 #endif

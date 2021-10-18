@@ -15,6 +15,9 @@
 enum class MESSAGE : int {
   MSG_DO_NOTHING,
   MSG_WRITE_BUFFER,
+  MSG_WRITE_100,  //晴れ
+  MSG_WRITE_200,  //曇り
+  MSG_WRITE_300,  //雨
   MSG_MAX,
 };
 

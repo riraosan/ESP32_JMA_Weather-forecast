@@ -3,13 +3,15 @@
 #include <esp32-hal-log.h>
 
 #if defined(ENABLE_ANIMATION)
-#include "earth.h"
 #include "100.h"
+#include "200.h"
+#include "300.h"
 #endif
 MESSAGE Display::_message = MESSAGE::MSG_DO_NOTHING;
 
-int16_t                        Display::_textOffset_x = 2;
-int16_t                        Display::_textOffset_y = 10;
+int16_t Display::_textOffset_x = 2;
+int16_t Display::_textOffset_y = 10;
+
 std::unique_ptr<ESP_8_BIT_GFX> Display::videoOut;
 
 Display::Display() : _temperature(0.0),
@@ -175,17 +177,36 @@ void Display::setNtpTime(String ntpTime) {
 void Display::update() {
 #if defined(ENABLE_ANIMATION)
   switch (_message) {
-    case MESSAGE::MSG_WRITE_BUFFER:
+    case MESSAGE::MSG_WRITE_100:
       if (gif.open((uint8_t *)_100, 2730, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       gif.close();
 
+      sendMessage(MESSAGE::MSG_WRITE_BUFFER);
+      break;
+    case MESSAGE::MSG_WRITE_200:
+      if (gif.open((uint8_t *)_200, 3018, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      gif.close();
+
+      sendMessage(MESSAGE::MSG_WRITE_BUFFER);
+      break;
+    case MESSAGE::MSG_WRITE_300:
+      if (gif.open((uint8_t *)_300, 3478, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      gif.close();
+
+      sendMessage(MESSAGE::MSG_WRITE_BUFFER);
+      break;
+    case MESSAGE::MSG_WRITE_BUFFER:
       displayWeatherInfo();
-      _message = MESSAGE::MSG_DO_NOTHING;
+      sendMessage(MESSAGE::MSG_WRITE_BUFFER);
       break;
     default:
-      _message = MESSAGE::MSG_DO_NOTHING;
+      break;
   }
   videoOut->waitForFrame();
 #else
