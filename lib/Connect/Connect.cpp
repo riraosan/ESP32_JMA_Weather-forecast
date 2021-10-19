@@ -30,6 +30,7 @@ void Connect::begin(void) {
 
   _config.autoReconnect = true;
   _config.ota           = AC_OTA_BUILTIN;
+  _config.apid          = _apName;
   _portal.config(_config);
 
   if (_portal.begin()) {

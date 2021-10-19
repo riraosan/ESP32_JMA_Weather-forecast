@@ -2,19 +2,18 @@
 #define _DISP_WEATHERINFO_APP
 
 #include <Arduino.h>
-#include <Wire.h>
-#include <SPI.h>
+//#include <Wire.h>
+//#include <SPI.h>
 #if defined(ENABLE_ANIMATION)
 #include <AnimatedGIF.h>
 #endif
 #include <ESP_8_BIT_GFX.h>
-#include <IRremoteESP8266.h>
-#include <IRsend.h>
 #include <memory>
 
 enum class MESSAGE : int {
   MSG_DO_NOTHING,
-  MSG_WRITE_BUFFER,
+  MSG_WRITE_INIT,
+  MSG_WRITE_DATA,
   MSG_WRITE_100,  //晴れ
   MSG_WRITE_200,  //曇り
   MSG_WRITE_300,  //雨
@@ -40,12 +39,13 @@ class Display {
 #endif
 
   static std::unique_ptr<ESP_8_BIT_GFX> videoOut;
-  std::unique_ptr<IRsend>               irsend;
 
  private:
   static MESSAGE _message;
   static int16_t _textOffset_x;
   static int16_t _textOffset_y;
+  static int16_t _gifOffset_x;
+  static int16_t _gifOffset_y;
 
   //data
   float  _temperature;

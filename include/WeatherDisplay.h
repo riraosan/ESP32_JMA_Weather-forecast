@@ -59,7 +59,7 @@ class WeatherDisplay {
 
       log_i("[%s] %2.1f*C, %2.1f%%, %4.1fhPa", createdAt.c_str(), temperature, humidity, pressure);
       _composite.setWeatherInfo(temperature, humidity, pressure, createdAt);
-      _composite.sendMessage(MESSAGE::MSG_WRITE_BUFFER);
+      _composite.sendMessage(MESSAGE::MSG_WRITE_DATA);
     } else {
       log_e("Problem reading channel. HTTP error code %d", _statusCode);
     }
@@ -112,7 +112,7 @@ class WeatherDisplay {
       _ntpTime = buffer;
 
       _composite.setNtpTime(buffer);
-      _composite.sendMessage(MESSAGE::MSG_WRITE_BUFFER);
+      _composite.sendMessage(MESSAGE::MSG_WRITE_DATA);
       _ntpClock = false;
     }
   }
@@ -122,6 +122,7 @@ class WeatherDisplay {
   Display _composite;
   Ticker  _serverChecker;
   Ticker  _ntpclocker;
+  Ticker  _weatherChecker;
 #if defined(TS_ENABLE_SSL)
   WiFiClientSecure _client;
 #else
