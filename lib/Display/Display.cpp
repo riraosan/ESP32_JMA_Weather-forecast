@@ -3,9 +3,12 @@
 #include <esp32-hal-log.h>
 
 #if defined(ENABLE_ANIMATION)
-#include <100.h>
-#include <200.h>
-#include <300.h>
+#include "icon/100.h"
+#include "icon/110.h"
+#include "icon/200.h"
+#include "icon/210.h"
+#include "icon/300.h"
+#include "icon/313.h"
 #endif
 MESSAGE Display::_message = MESSAGE::MSG_DO_NOTHING;
 
@@ -62,9 +65,9 @@ void Display::setWeatherInfo(float temperature, float humidity, float pressure, 
 }
 
 void Display::displayWeatherInfo(void) {
-  //log_i("[%s] %2.1f*C, %2.1f%%, %4.1fhPa", _time.c_str(), _temperature, _humidity, _pressure);
+  // log_i("[%s] %2.1f*C, %2.1f%%, %4.1fhPa", _time.c_str(), _temperature, _humidity, _pressure);
 
-  //Header
+  // Header
   String time(" __TIME__         ");
   time.replace("__TIME__", _time);
   videoOut->setTextColor(0xFFFF, _bgTitle);
@@ -97,11 +100,11 @@ void Display::displayWeatherInfo(void) {
   videoOut->printEfont(press);
   videoOut->printEfont("hPa");
 
-  //footer
+  // footer
   String ntpTime(" __NTP__                     ");
   ntpTime.replace("__NTP__", _ntpTime);
   videoOut->setTextColor(0xFFFF, _bgTitle);
-  videoOut->printEfont(ntpTime.c_str(), _textOffset_x, _textOffset_y + 16 * 13, 1);  //NTP Clock
+  videoOut->printEfont(ntpTime.c_str(), _textOffset_x, _textOffset_y + 16 * 13, 1);  // NTP Clock
 }
 
 void Display::update() {
@@ -153,12 +156,12 @@ void Display::update() {
   }
   videoOut->waitForFrame();
 #endif
-  //delay(1);
+  // delay(1);
 }
 
 #if defined(ENABLE_ANIMATION)
 void Display::GIFDraw(GIFDRAW *pDraw) {
-  uint8_t * s;
+  uint8_t  *s;
   uint16_t *d, *usPalette, usTemp[320];
   int       x, y;
 
