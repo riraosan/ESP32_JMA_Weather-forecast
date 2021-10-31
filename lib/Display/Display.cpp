@@ -4,12 +4,14 @@
 
 #if defined(ENABLE_ANIMATION)
 #include "icon/100.h"
-#include "icon/110.h"
 #include "icon/200.h"
-#include "icon/210.h"
 #include "icon/300.h"
+#include "icon/110.h"
+#include "icon/210.h"
+#include "icon/212.h"
 #include "icon/313.h"
 #endif
+
 MESSAGE Display::_message = MESSAGE::MSG_DO_NOTHING;
 
 int16_t Display::_textOffset_x = 5;
@@ -118,7 +120,7 @@ void Display::update() {
       sendMessage(MESSAGE::MSG_DO_NOTHING);
       break;
     case MESSAGE::MSG_WRITE_100:
-      if (gif.open((uint8_t *)_100, 2730, GIFDraw)) {
+      if (gif.open((uint8_t *)_100, size_100, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       gif.close();
@@ -126,7 +128,7 @@ void Display::update() {
       sendMessage(MESSAGE::MSG_DO_NOTHING);
       break;
     case MESSAGE::MSG_WRITE_200:
-      if (gif.open((uint8_t *)_200, 3018, GIFDraw)) {
+      if (gif.open((uint8_t *)_200, size_200, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       gif.close();
@@ -134,11 +136,39 @@ void Display::update() {
       sendMessage(MESSAGE::MSG_DO_NOTHING);
       break;
     case MESSAGE::MSG_WRITE_300:
-      if (gif.open((uint8_t *)_300, 3478, GIFDraw)) {
+      if (gif.open((uint8_t *)_300, size_300, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       gif.close();
 
+      sendMessage(MESSAGE::MSG_DO_NOTHING);
+      break;
+    case MESSAGE::MSG_WRITE_110:
+      if (gif.open((uint8_t *)_110, size_110, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      gif.close();
+      sendMessage(MESSAGE::MSG_DO_NOTHING);
+      break;
+    case MESSAGE::MSG_WRITE_210:
+      if (gif.open((uint8_t *)_210, size_210, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      gif.close();
+      sendMessage(MESSAGE::MSG_DO_NOTHING);
+      break;
+    case MESSAGE::MSG_WRITE_212:
+      if (gif.open((uint8_t *)_212, size_212, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      gif.close();
+      sendMessage(MESSAGE::MSG_DO_NOTHING);
+      break;
+    case MESSAGE::MSG_WRITE_313:
+      if (gif.open((uint8_t *)_313, size_313, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      gif.close();
       sendMessage(MESSAGE::MSG_DO_NOTHING);
       break;
     default:

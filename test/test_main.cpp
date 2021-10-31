@@ -27,26 +27,42 @@ void font_test2(void) {
   disp.videoOut->setTextSize(2);
   disp.videoOut->setTextColor(0xFFFF, 0x0000);
   disp.videoOut->setCursor(5, 10);
-  disp.videoOut->printEfont("フォント2");
+  disp.videoOut->printEfont("Font 2");
 }
 
 void font_test3(void) {
   disp.videoOut->setTextSize(3);
   disp.videoOut->setTextColor(0xFFFF, 0x0000);
   disp.videoOut->setCursor(5, 10);
-  disp.videoOut->printEfont("フォント3");
+  disp.videoOut->printEfont("Font 3");
 }
 
 void icon_test_100(void) {
   disp.sendMessage(MESSAGE::MSG_WRITE_100);
 }
 
+void icon_test_110(void) {
+  disp.sendMessage(MESSAGE::MSG_WRITE_110);
+}
+
 void icon_test_200(void) {
   disp.sendMessage(MESSAGE::MSG_WRITE_200);
 }
 
+void icon_test_210(void) {
+  disp.sendMessage(MESSAGE::MSG_WRITE_210);
+}
+
+void icon_test_212(void) {
+  disp.sendMessage(MESSAGE::MSG_WRITE_212);
+}
+
 void icon_test_300(void) {
   disp.sendMessage(MESSAGE::MSG_WRITE_300);
+}
+
+void icon_test_313(void) {
+  disp.sendMessage(MESSAGE::MSG_WRITE_313);
 }
 
 void endtest(void){
@@ -82,6 +98,18 @@ void setup() {
   delay(3000);
 
   RUN_TEST(icon_test_300);
+  delay(3000);
+
+  RUN_TEST(icon_test_210);
+  delay(3000);
+
+  RUN_TEST(icon_test_212);
+  delay(3000);
+
+  RUN_TEST(icon_test_300);
+  delay(3000);
+
+  RUN_TEST(icon_test_313);
   delay(3000);
 
   endtest();

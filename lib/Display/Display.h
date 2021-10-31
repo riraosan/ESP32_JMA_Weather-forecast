@@ -1,9 +1,7 @@
-#ifndef _DISP_WEATHERINFO_APP
-#define _DISP_WEATHERINFO_APP
+
+#pragma once
 
 #include <Arduino.h>
-//#include <Wire.h>
-//#include <SPI.h>
 #if defined(ENABLE_ANIMATION)
 #include <AnimatedGIF.h>
 #endif
@@ -12,12 +10,16 @@
 
 enum class MESSAGE : int {
   MSG_DO_NOTHING,
-  MSG_WRITE_INIT,
-  MSG_WRITE_DATA,
+  MSG_WRITE_INIT, //使用していない
+  MSG_WRITE_DATA, //気温、湿度、気圧を描く
   MSG_WRITE_100,  //晴れ
   MSG_WRITE_200,  //曇り
   MSG_WRITE_300,  //雨
-  MSG_MAX,
+  MSG_WRITE_110,  //晴れのち曇り
+  MSG_WRITE_210,  //曇りのち晴れ
+  MSG_WRITE_212,  //曇りのち雨
+  MSG_WRITE_313,  //雨のち曇り
+  MSG_WRITE_MAX
 };
 
 class Display {
@@ -47,19 +49,17 @@ class Display {
   static int16_t _gifOffset_x;
   static int16_t _gifOffset_y;
 
-  //data
+  // data
   float  _temperature;
   float  _humidity;
   float  _pressure;
   String _time;
   String _ntpTime;
 
-  //color
+  // color
   uint16_t _bgColor;
   uint16_t _bgTitle;
   uint16_t _bgTemperature;
   uint16_t _bgPressure;
   uint16_t _bgHumidity;
 };
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef _TASK_PERSION_H_
-#define _TASK_PERSION_H_
+
+#pragma once
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -7,7 +7,7 @@
 
 class Task {
  public:
-  Task(std::string taskName = "task", uint16_t taskSize = 4096, uint8_t priority = 5);
+  Task(std::string taskName = "AutoConnect", uint16_t taskSize = 4096, uint8_t priority = 5);
   ~Task();
   void start(void* taskData = nullptr);
   void stop();
@@ -30,5 +30,3 @@ class Task {
   uint8_t     m_priority;
   BaseType_t  m_coreid;
 };
-
-#endif

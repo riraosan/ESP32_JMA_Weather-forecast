@@ -7,8 +7,6 @@
 
 #include "Task.h"
 
-static char tag[] = "Task";
-
 Task::Task(std::string taskName, uint16_t taskSize, uint8_t priority) {
   m_handle   = nullptr;
   m_taskdata = nullptr;
@@ -23,15 +21,15 @@ Task::~Task() {
 
 void Task::runTask(void* pTaskInstance) {
   Task* pTask = (Task*)pTaskInstance;
-  ESP_LOGD(tag, ">> Task %s run", pTask->m_taskname.c_str());
+  log_d(">> Task %s run", pTask->m_taskname.c_str());
   pTask->run(pTask->m_taskdata);
-  ESP_LOGD(tag, "<< Task %s stop", pTask->m_taskname.c_str());
+  log_d("<< Task %s stop", pTask->m_taskname.c_str());
   pTask->stop();
 }
 
 void Task::start(void* taskData) {
   if (m_handle != nullptr) {
-    ESP_LOGD(tag, "[] Task %s is already running", m_taskname.c_str());
+    log_d("Task %s is already running", m_taskname.c_str());
   }
   m_taskdata = taskData;
   ::xTaskCreatePinnedToCore(&runTask, m_taskname.c_str(), m_tasksize, this, m_priority, &m_handle, m_coreid);
