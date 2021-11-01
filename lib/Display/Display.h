@@ -10,15 +10,15 @@
 
 enum class MESSAGE : int {
   MSG_DO_NOTHING,
-  MSG_WRITE_INIT, //使用していない
-  MSG_WRITE_DATA, //気温、湿度、気圧を描く
-  MSG_WRITE_100,  //晴れ
-  MSG_WRITE_200,  //曇り
-  MSG_WRITE_300,  //雨
-  MSG_WRITE_110,  //晴れのち曇り
-  MSG_WRITE_210,  //曇りのち晴れ
-  MSG_WRITE_212,  //曇りのち雨
-  MSG_WRITE_313,  //雨のち曇り
+  MSG_WRITE_INIT,  //未使用
+  MSG_WRITE_DATA,  //気温、湿度、気圧を描く
+  MSG_WRITE_100,   //晴れ
+  MSG_WRITE_200,   //曇り
+  MSG_WRITE_300,   //雨
+  MSG_WRITE_110,   //晴れのち曇り
+  MSG_WRITE_210,   //曇りのち晴れ
+  MSG_WRITE_212,   //曇りのち雨
+  MSG_WRITE_313,   //雨のち曇り
   MSG_WRITE_MAX
 };
 
