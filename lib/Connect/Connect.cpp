@@ -6,6 +6,7 @@ Connect::Connect() : _portal(_server),
                      _hostName("atom_display"),
                      _apName("ATOM_DISP-G-AP"),
                      _httpPort(80) {
+
   _content = String(R"(
 <!DOCTYPE html>
 <html>
@@ -17,6 +18,7 @@ Place the root page with the sketch application.&ensp;
 __AC_LINK__
 </body>
 </html>)");
+
 }
 
 Connect::~Connect() {}

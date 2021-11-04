@@ -4,8 +4,7 @@
 #include <string>
 #include <esp_log.h>
 #include <esp32-hal-log.h>
-
-#include "Task.h"
+#include <Task.h>
 
 Task::Task(std::string taskName, uint16_t taskSize, uint8_t priority) {
   m_handle   = nullptr;

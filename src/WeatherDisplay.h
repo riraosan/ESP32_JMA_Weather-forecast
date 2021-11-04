@@ -2,22 +2,18 @@
 #pragma once
 
 #include <Arduino.h>
+#include <secrets.h>
 #include <Connect.h>
 #include <Display.h>
-#include <ThingSpeak.h>
+#include <Weather.h>
+
 #include <Ticker.h>
-#include <secrets.h>
+#include <ThingSpeak.h>
 #if defined(TS_ENABLE_SSL)
 #include <WiFiClientSecure.h>
 #else
 #include <WiFiClient.h>
 #endif
-
-// NTP Clock
-#define TIME_ZONE   "JST-9"
-#define NTP_SERVER1 "ntp.nict.jp"
-#define NTP_SERVER2 "ntp.jst.mfeed.ad.jp"
-#define NTP_SERVER3 "asia.pool.ntp.org"
 
 class WeatherDisplay {
  public:
