@@ -5,6 +5,8 @@
     "timeSeries": [
       {
         "timeDefines": [
+          true,
+          true,
           true
         ],
         "areas": [
@@ -14,6 +16,8 @@
               "code": true
             },
             "weatherCodes": [
+              true,
+              true,
               true
             ]
           }

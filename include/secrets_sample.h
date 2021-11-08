@@ -1,5 +1,9 @@
 // Use this file to store all of the private credentials
 // and connection details
+#define TIME_ZONE           "JST-9"
+#define NTP_SERVER1         "ntp.nict.jp"
+#define NTP_SERVER2         "ntp.jst.mfeed.ad.jp"
+#define NTP_SERVER3         "asia.pool.ntp.org"
 
 #define SECRET_SSID         "your_ssid"
 #define SECRET_PASS         "your_ap_password"

@@ -6,9 +6,7 @@ Connect::Connect() : _portal(_server),
                      _hostName("atom_display"),
                      _apName("ATOM_DISP-G-AP"),
                      _httpPort(80) {
-
-  _content = String(R"(
-<!DOCTYPE html>
+  _content = String(R"(<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
@@ -18,7 +16,6 @@ Place the root page with the sketch application.&ensp;
 __AC_LINK__
 </body>
 </html>)");
-
 }
 
 Connect::~Connect() {}
@@ -49,11 +46,12 @@ void Connect::begin(void) {
   }
 }
 
-void Connect::run(void *data) {
-  data = nullptr;
+void Connect::begin(const char* SSID, const char* PASSWORD) {
+  _portal.config(SSID, PASSWORD);
+  this->begin();
+}
 
-  begin();
-
+void Connect::run(void* data) {
   while (1) {
     _portal.handleClient();
     delay(1);

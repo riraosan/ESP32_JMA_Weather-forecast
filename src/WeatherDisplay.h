@@ -66,13 +66,15 @@ class WeatherDisplay {
     _wifi.setTaskSize(4096 * 1);
     _wifi.setTaskPriority(2);
     _wifi.setCore(0);
+    _wifi.begin();
     _wifi.start(nullptr);
 
 #if defined(TS_ENABLE_SSL)
     _client.setCACert(_certificate);
 #endif
 
-    ThingSpeak.begin(_client);
+    // ThingSpeak.begin(_client);
+    _weather.begin(_client);
 
 #if defined(TEST_PERIOD)
     _serverChecker.attach(30, timerCallback);
@@ -94,7 +96,7 @@ class WeatherDisplay {
   void update(void) {
     _composite.update();
     if (_timer) {
-      getInformation();
+      // getInformation();
       _timer = false;
     }
 
@@ -116,6 +118,7 @@ class WeatherDisplay {
  private:
   Connect _wifi;
   Display _composite;
+  Weather _weather;
   Ticker  _serverChecker;
   Ticker  _ntpclocker;
   Ticker  _weatherChecker;

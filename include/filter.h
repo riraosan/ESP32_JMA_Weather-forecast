@@ -1,7 +1,6 @@
 
 // R = Raw String Literals(C++)
-constexpr char filter[] = R"(
-[
+constexpr char filter[] = R"([
   {
     "publishingOffice": true,
     "reportDatetime": true,
@@ -24,5 +23,4 @@ constexpr char filter[] = R"(
       }
     ]
   }
-]
-)";
+])";
