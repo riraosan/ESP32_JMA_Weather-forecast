@@ -1,6 +1,7 @@
 
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <WiFiClient.h>
 #include <ArduinoJson.h>
 #include <WeatherCode.h>
 
@@ -9,7 +10,7 @@ class Weather {
   Weather();
   ~Weather();
 
-  void   begin(HTTPClient &client);
+  void   begin(WiFiClient &client);
   String getForecast(uint16_t local_gov_code);
   String createRequest(uint16_t local_gov_code);
   String getTodayForcast(void);
@@ -33,7 +34,8 @@ class Weather {
   String _todayForcast;
   String _nextdayForcast;
 
-  HTTPClient *_client;
+  WiFiClient _wifiClient;
+  HTTPClient _httpClient;
 
   StaticJsonDocument<400>  _filter;
   StaticJsonDocument<2500> _doc;

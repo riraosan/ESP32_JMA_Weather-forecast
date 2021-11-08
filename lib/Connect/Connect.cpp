@@ -47,8 +47,29 @@ void Connect::begin(void) {
 }
 
 void Connect::begin(const char* SSID, const char* PASSWORD) {
-  _portal.config(SSID, PASSWORD);
-  this->begin();
+  // Responder of root page and apply page handled directly from WebServer class.
+  _server.on("/", [this]() {
+    _content.replace("__AC_LINK__", String(AUTOCONNECT_LINK(COG_16)));
+    _server.send(200, "text/html", _content);
+  });
+
+  _config.autoReconnect = true;
+  _config.ota           = AC_OTA_BUILTIN;
+  _config.apid          = _apName;
+  _portal.config(_config);
+
+  if (_portal.begin(SSID, PASSWORD)) {
+    log_i("WiFi connected: %s", WiFi.localIP().toString().c_str());
+
+    if (MDNS.begin(_hostName.c_str())) {
+      MDNS.addService("http", "tcp", _httpPort);
+      log_i("HTTP Server ready! Open http://%s.local/ in your browser\n", _hostName.c_str());
+    } else
+      log_e("Error setting up MDNS responder");
+  } else {
+    log_e("ESP32 can't connect to AP.");
+    ESP.restart();
+  }
 }
 
 void Connect::run(void* data) {

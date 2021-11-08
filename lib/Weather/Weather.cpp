@@ -7,13 +7,13 @@ Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__W
                      _host("www.jma.go.jp"),
                      _user_agent("User-Agent: ESP32-PICO\r\n"),
                      _connection("Connection: close\r\n") {
-    deserializeJson(_filter, filter);
+  deserializeJson(_filter, filter);
 }
 
 Weather::~Weather() {}
 
-void Weather::begin(HTTPClient& client) {
-  _client = &client;
+void Weather::begin(WiFiClient& client) {
+  _wifiClient = client;
 }
 
 String Weather::createRequest(uint16_t local_gov_code) {
@@ -43,14 +43,14 @@ String Weather::_createURL(uint16_t local_gov_code) {
 String Weather::getForecast(uint16_t local_gov_code) {
   String url(_createURL(local_gov_code));
 
-  _client->setReuse(false);
-  _client->begin(url);
+  _httpClient.setReuse(false);
+  _httpClient.begin(_wifiClient, url);
 
-  int httpCode = _client->GET();
+  int httpCode = _httpClient.GET();
 
   if (httpCode > 0) {
     if (httpCode == HTTP_CODE_OK) {
-      _response = _client->getString();
+      _response = _httpClient.getString();
 
       log_i("Response\n%s", _response.c_str());
 
@@ -61,7 +61,7 @@ String Weather::getForecast(uint16_t local_gov_code) {
 
       if (error) {
         log_e("deserializeJson() failed: %s", error.f_str());
-        _client->end();
+        _httpClient.end();
         return error.f_str();
       }
 
@@ -78,34 +78,33 @@ String Weather::getForecast(uint16_t local_gov_code) {
       const char* root_0_timeSeries_0_timeDefines_0 = root_0_timeSeries_0_timeDefines[0];
       const char* root_0_timeSeries_0_timeDefines_1 = root_0_timeSeries_0_timeDefines[1];
       const char* root_0_timeSeries_0_timeDefines_2 = root_0_timeSeries_0_timeDefines[2];
-
       // log_i("timeDefines_0 %s", root_0_timeSeries_0_timeDefines_0);
       // log_i("timeDefines_1 %s", root_0_timeSeries_0_timeDefines_1);
       // log_i("timeDefines_2 %s", root_0_timeSeries_0_timeDefines_2);
 
       const char* root_0_timeSeries_0_areas_0_area_name = root_0_timeSeries[0]["areas"][0]["area"]["name"];
       const char* root_0_timeSeries_0_areas_0_area_code = root_0_timeSeries[0]["areas"][0]["area"]["code"];
-
       // log_i("area_name %s", root_0_timeSeries_0_areas_0_area_name);
       // log_i("area_code %s", root_0_timeSeries_0_areas_0_area_code);
 
       JsonArray root_0_timeSeries_0_areas_0_weatherCodes = root_0_timeSeries[0]["areas"][0]["weatherCodes"];
+      if (root_0_timeSeries_0_areas_0_weatherCodes[0] != nullptr) {
+        log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[0]);
+        log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[1]);
+        // log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[2]);
 
-      log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[0]);
-      log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[1]);
-      // log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[2]);
+        _todayForcast   = (const char*)root_0_timeSeries_0_areas_0_weatherCodes[0];
+        _nextdayForcast = (const char*)root_0_timeSeries_0_areas_0_weatherCodes[1];
+      }
 
-      _todayForcast   = (const char*)root_0_timeSeries_0_areas_0_weatherCodes[0];
-      _nextdayForcast = (const char*)root_0_timeSeries_0_areas_0_weatherCodes[1];
-
-      _client->end();
+      _httpClient.end();
       return _response;
     }
   }
 
-  String error = _client->errorToString(httpCode);
+  String error = _httpClient.errorToString(httpCode);
 
-  _client->end();
+  _httpClient.end();
 
   log_e("[HTTP] GET... failed, error: %s", error.c_str());
   return error;

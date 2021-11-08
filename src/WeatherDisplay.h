@@ -12,7 +12,8 @@
 #if defined(TS_ENABLE_SSL)
 #include <WiFiClientSecure.h>
 #else
-#include <WiFiClient.h>
+//#include <WiFiClient.h>
+#include <HTTPClient.h>
 #endif
 
 class WeatherDisplay {
@@ -73,8 +74,8 @@ class WeatherDisplay {
     _client.setCACert(_certificate);
 #endif
 
-    // ThingSpeak.begin(_client);
-    _weather.begin(_client);
+    ThingSpeak.begin(_wifiClient);
+    _weather.begin(_wifiClient);
 
 #if defined(TEST_PERIOD)
     _serverChecker.attach(30, timerCallback);
@@ -96,7 +97,7 @@ class WeatherDisplay {
   void update(void) {
     _composite.update();
     if (_timer) {
-      // getInformation();
+      getInformation();
       _timer = false;
     }
 
@@ -125,7 +126,8 @@ class WeatherDisplay {
 #if defined(TS_ENABLE_SSL)
   WiFiClientSecure _client;
 #else
-  WiFiClient _client;
+  WiFiClient _wifiClient;
+  HTTPClient _client;
 #endif
 
   static bool _timer;

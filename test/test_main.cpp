@@ -17,8 +17,7 @@ Connect _wifi;
 #if defined(_DISPLAY)
 Display _disp;
 #endif
-// WiFiClient _client;
-HTTPClient _client;
+WiFiClient _client;
 Weather    _weather;
 
 void setUp(void) {
@@ -52,12 +51,12 @@ void weather_test_004(void) {
 
 void weather_test_005(void) {
   String today(_weather.getTodayForcast());
-  Serial.printf("%s\n", today.c_str());
+  Serial.printf("today:%s\n", today.c_str());
 }
 
 void weather_test_006(void) {
   String nextday(_weather.getNextdayForcast());
-  Serial.printf("%s\n", nextday.c_str());
+  Serial.printf("nextday:%s\n", nextday.c_str());
 }
 
 #if defined(_DISPLAY)
