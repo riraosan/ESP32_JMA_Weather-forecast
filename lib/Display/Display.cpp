@@ -14,9 +14,9 @@
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
-int16_t Display::_textOffset_x = 5;
+int16_t Display::_textOffset_x = 0;
 int16_t Display::_textOffset_y = 10;
-int16_t Display::_gifOffset_x  = 5;
+int16_t Display::_gifOffset_x  = 10;
 int16_t Display::_gifOffset_y  = 10;
 
 std::unique_ptr<ESP_8_BIT_GFX> Display::videoOut;
@@ -222,7 +222,7 @@ void Display::GIFDraw(GIFDRAW *pDraw) {
       if (iCount)  // any opaque pixels?
       {
         for (int xOffset = 0; xOffset < iCount; xOffset++) {
-          videoOut->drawPixel(pDraw->iX + x + xOffset + _gifOffset_x, y + _gifOffset_y, usTemp[xOffset]);
+          videoOut->drawPixel(pDraw->iX + x + xOffset + _gifOffset_x, y + _gifOffset_y + 32, usTemp[xOffset]);
         }
         x += iCount;
         iCount = 0;

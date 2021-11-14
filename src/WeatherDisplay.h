@@ -118,7 +118,7 @@ class WeatherDisplay {
     _forcastChecker.attach(60 * 60, forcastCallback);
 #endif
 
-    delay(10000);
+    // delay(10000);
     beginNtpClock();
 
     _composite.begin(12, true, 16);

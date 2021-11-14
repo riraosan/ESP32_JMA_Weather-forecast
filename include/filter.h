@@ -17,6 +17,9 @@ constexpr char filter[] = R"([
             },
             "weatherCodes": [
               true
+            ],
+            "weathers": [
+              true
             ]
           }
         ]
