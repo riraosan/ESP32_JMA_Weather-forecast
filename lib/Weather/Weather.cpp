@@ -28,6 +28,7 @@ String Weather::createRequest(uint16_t local_gov_code) {
 
   return _request;
 }
+
 String Weather::_createURL(uint16_t local_gov_code) {
   String code(local_gov_code);
   code += "0.json";
@@ -50,7 +51,7 @@ String Weather::getForecast(uint16_t local_gov_code) {
     if (httpCode == HTTP_CODE_OK) {
       _response = _httpClient.getString();
 
-      log_i("Response\n%s", _response.c_str());
+      //log_i("Response\n%s", _response.c_str());
 
       DeserializationError error = deserializeJson(_doc,
                                                    _response.c_str(),
@@ -68,28 +69,18 @@ String Weather::getForecast(uint16_t local_gov_code) {
       const char* root_0_reportDatetime   = root_0["reportDatetime"];
 
       log_i("publishingOffice %s", root_0_publishingOffice);
-      // log_i("reportDatetime   %s", root_0_reportDatetime);
+      log_i("reportDatetime   %s", root_0_reportDatetime);
 
       JsonArray root_0_timeSeries = root_0["timeSeries"];
-
-      JsonArray   root_0_timeSeries_0_timeDefines   = root_0_timeSeries[0]["timeDefines"];
-      const char* root_0_timeSeries_0_timeDefines_0 = root_0_timeSeries_0_timeDefines[0];
-      const char* root_0_timeSeries_0_timeDefines_1 = root_0_timeSeries_0_timeDefines[1];
-      const char* root_0_timeSeries_0_timeDefines_2 = root_0_timeSeries_0_timeDefines[2];
-      // log_i("timeDefines_0 %s", root_0_timeSeries_0_timeDefines_0);
-      // log_i("timeDefines_1 %s", root_0_timeSeries_0_timeDefines_1);
-      // log_i("timeDefines_2 %s", root_0_timeSeries_0_timeDefines_2);
-
       const char* root_0_timeSeries_0_areas_0_area_name = root_0_timeSeries[0]["areas"][0]["area"]["name"];
       const char* root_0_timeSeries_0_areas_0_area_code = root_0_timeSeries[0]["areas"][0]["area"]["code"];
-      // log_i("area_name %s", root_0_timeSeries_0_areas_0_area_name);
-      // log_i("area_code %s", root_0_timeSeries_0_areas_0_area_code);
+      log_i("area_name %s", root_0_timeSeries_0_areas_0_area_name);
+      log_i("area_code %s", root_0_timeSeries_0_areas_0_area_code);
 
       JsonArray root_0_timeSeries_0_areas_0_weatherCodes = root_0_timeSeries[0]["areas"][0]["weatherCodes"];
       if (root_0_timeSeries_0_areas_0_weatherCodes[0] != nullptr) {
         log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[0]);
         log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[1]);
-        // log_i("weatherCodes %s", (const char*)root_0_timeSeries_0_areas_0_weatherCodes[2]);
 
         _todayForcast   = (const char*)root_0_timeSeries_0_areas_0_weatherCodes[0];
         _nextdayForcast = (const char*)root_0_timeSeries_0_areas_0_weatherCodes[1];

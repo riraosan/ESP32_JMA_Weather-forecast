@@ -3,11 +3,10 @@
 
 #include <Arduino.h>
 #include <secrets.h>
+#include <WeatherCode.h>
 #include <Connect.h>
 #include <Display.h>
 #include <Weather.h>
-#include <WeatherCode.h>
-
 #include <Ticker.h>
 #include <ThingSpeak.h>
 #if defined(TS_ENABLE_SSL)
@@ -37,11 +36,11 @@ class WeatherDisplay {
   }
 
   static void dataCallback(void) {
-    sendMessage(MESSAGE::MSG_WRITE_DATA);
+    sendMessage(MESSAGE::MSG_CHECK_DATA);
   }
 
   static void forcastCallback(void) {
-    sendMessage(MESSAGE::MSG_WRITE_FORCAST);
+    sendMessage(MESSAGE::MSG_CHECK_FORCAST);
   }
 
   void beginNtpClock(void) {
@@ -49,7 +48,7 @@ class WeatherDisplay {
     _ntpclocker.attach_ms(500, setNtpTime);
   }
 
-  void getInformation(void) {
+  void setInformation(void) {
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
     _statusCode = ThingSpeak.readMultipleFields(_weatherStationChannelNumber);
@@ -65,20 +64,34 @@ class WeatherDisplay {
 
       log_i("[%s] %2.1f*C, %2.1f%%, %4.1fhPa", createdAt.c_str(), temperature, humidity, pressure);
       _composite.setWeatherInfo(temperature, humidity, pressure, createdAt);
-      _composite.sendMessage(MESSAGE::MSG_WRITE_DATA);
+      _composite.sendMessage(MESSAGE::MSG_CHECK_DATA);
     } else {
       log_e("Problem reading channel. HTTP error code %d", _statusCode);
     }
   }
 
-  void getWeatherForcast(void) {
+  void setWeatherForcast(void) {
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
     String result(_weather.getForecast(LOCAL_GOV_CODE));
+
     if (result.isEmpty()) {
       String forcastcode(_weather.getTodayForcast());
       log_i("Success to get Forcast code: %s", forcastcode.c_str());
 
-      // TODO ここにDisplayクラスのGIFを描くメソッドを追加する
+      _composite.sendMessage((MESSAGE)forcastcode.toInt());
+    }
+  }
+
+  void setNtpClock(void) {
+    char      buffer[16] = {0};
+    struct tm info;
+    if (getLocalTime(&info)) {
+      sprintf(buffer, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
+
+      _ntpTime = buffer;
+
+      _composite.setNtpTime(_ntpTime);
+      _composite.sendMessage(MESSAGE::MSG_CHECK_DATA);
     }
   }
 
@@ -98,21 +111,18 @@ class WeatherDisplay {
     _weather.begin(_wifiClient);
 
 #if defined(TEST_PERIOD)
-    _serverChecker.attach(30, dataCallback);
+    _serverChecker.attach(20, dataCallback);
     _forcastChecker.attach(30, forcastCallback);
 #else
     _serverChecker.attach(60 * 10, dataCallback);
     _forcastChecker.attach(60 * 60, forcastCallback);
 #endif
 
+    delay(10000);
     beginNtpClock();
 
-    delay(5000);
-    setNtpTime();
-    dataCallback();
-
     _composite.begin(12, true, 16);
-
+    sendMessage(MESSAGE::MSG_INIT_DATA);
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   }
 
@@ -120,25 +130,25 @@ class WeatherDisplay {
     _composite.update();
 
     switch (_message) {
-      case MESSAGE::MSG_CHECK_CLOCK: {
-        time_t     t  = time(NULL);
-        struct tm* tm = localtime(&t);
+      case MESSAGE::MSG_CHECK_CLOCK:
+        setNtpClock();
 
-        char buffer[16] = {0};
-        sprintf(buffer, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
-
-        _ntpTime = buffer;
-
-        _composite.setNtpTime(_ntpTime);
-        _composite.sendMessage(MESSAGE::MSG_WRITE_DATA);
-        sendMessage(MESSAGE::MSG_NOTHING);
-      } break;
-      case MESSAGE::MSG_WRITE_DATA:
-        getInformation();
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
-      case MESSAGE::MSG_WRITE_FORCAST:
-        getWeatherForcast();
+      case MESSAGE::MSG_INIT_DATA:
+        setInformation();
+
+        sendMessage(MESSAGE::MSG_CHECK_FORCAST);
+        break;
+      case MESSAGE::MSG_CHECK_DATA:
+        setInformation();
+
+        sendMessage(MESSAGE::MSG_NOTHING);
+        break;
+      case MESSAGE::MSG_CHECK_FORCAST:
+        configTzTime(TIME_ZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
+        setWeatherForcast();
+
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
       default:

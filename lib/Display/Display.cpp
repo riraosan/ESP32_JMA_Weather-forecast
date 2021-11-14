@@ -56,7 +56,7 @@ void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut->fillScreen(_bgColor);
   videoOut->waitForFrame();
 
-  sendMessage(MESSAGE::MSG_WRITE_DATA);
+  sendMessage(MESSAGE::MSG_CHECK_DATA);
 }
 
 void Display::setWeatherInfo(float temperature, float humidity, float pressure, String time) {
@@ -112,7 +112,7 @@ void Display::displayWeatherInfo(void) {
 void Display::update() {
 #if defined(ENABLE_ANIMATION)
   switch (_message) {
-    case MESSAGE::MSG_WRITE_DATA:
+    case MESSAGE::MSG_CHECK_DATA:
       displayWeatherInfo();
       sendMessage(MESSAGE::MSG_NOTHING);
       break;

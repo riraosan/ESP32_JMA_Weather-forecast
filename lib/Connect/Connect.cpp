@@ -20,7 +20,7 @@ __AC_LINK__
 
 void Connect::begin(void) {
   // Responder of root page and apply page handled directly from WebServer class.
-  _server.on("/", [this]() {
+  _server.on("/", [&]() {
     _content.replace("__AC_LINK__", String(AUTOCONNECT_LINK(COG_16)));
     _server.send(200, "text/html", _content);
   });
@@ -46,7 +46,7 @@ void Connect::begin(void) {
 
 void Connect::begin(const char* SSID, const char* PASSWORD) {
   // Responder of root page and apply page handled directly from WebServer class.
-  _server.on("/", [this]() {
+  _server.on("/", [&]() {
     _content.replace("__AC_LINK__", String(AUTOCONNECT_LINK(COG_16)));
     _server.send(200, "text/html", _content);
   });
