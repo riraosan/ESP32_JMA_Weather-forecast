@@ -10,8 +10,6 @@ Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__W
   deserializeJson(_filter, filter);
 }
 
-Weather::~Weather() {}
-
 void Weather::begin(WiFiClient& client) {
   _wifiClient = client;
 }
@@ -98,7 +96,7 @@ String Weather::getForecast(uint16_t local_gov_code) {
       }
 
       _httpClient.end();
-      return _response;
+      return "";
     }
   }
 

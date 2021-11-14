@@ -38,8 +38,8 @@ void Display::setTextOffset(int16_t x, int16_t y) {
   _textOffset_y = y;
 }
 
-void Display::sendMessage(MESSAGE msg) {
-  _message = msg;
+void Display::sendMessage(MESSAGE message) {
+  _message = message;
 }
 
 void Display::setNtpTime(String ntpTime) {
@@ -112,9 +112,6 @@ void Display::displayWeatherInfo(void) {
 void Display::update() {
 #if defined(ENABLE_ANIMATION)
   switch (_message) {
-    // case MESSAGE::MSG_WEATHER_INIT:
-    //   videoOut->fillScreen(0x0019);
-    //   break;
     case MESSAGE::MSG_WRITE_DATA:
       displayWeatherInfo();
       sendMessage(MESSAGE::MSG_NOTHING);
@@ -123,51 +120,45 @@ void Display::update() {
       if (gif.open((uint8_t *)_100, size_100, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      gif.close();
-
-      sendMessage(MESSAGE::MSG_NOTHING);
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_200:
       if (gif.open((uint8_t *)_200, size_200, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      gif.close();
-
-      sendMessage(MESSAGE::MSG_NOTHING);
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_300:
       if (gif.open((uint8_t *)_300, size_300, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      gif.close();
-
-      sendMessage(MESSAGE::MSG_NOTHING);
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_110:
       if (gif.open((uint8_t *)_110, size_110, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      gif.close();
-      sendMessage(MESSAGE::MSG_NOTHING);
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_210:
       if (gif.open((uint8_t *)_210, size_210, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      gif.close();
-      sendMessage(MESSAGE::MSG_NOTHING);
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_212:
       if (gif.open((uint8_t *)_212, size_212, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      gif.close();
-      sendMessage(MESSAGE::MSG_NOTHING);
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_313:
       if (gif.open((uint8_t *)_313, size_313, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
+      break;
+    case MESSAGE::MSG_GIF_CLOSE:
       gif.close();
       sendMessage(MESSAGE::MSG_NOTHING);
       break;

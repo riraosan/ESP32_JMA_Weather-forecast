@@ -3,10 +3,10 @@
 #include <esp32-hal-log.h>
 
 Connect::Connect() : _portal(_server),
-                     _hostName("atom_display"),
-                     _apName("ATOM_DISP-G-AP"),
+                     _hostName(F("atom_display")),
+                     _apName(F("ATOM_DISP-G-AP")),
                      _httpPort(80) {
-  _content = String(R"(<!DOCTYPE html>
+  _content = String(F(R"(<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
@@ -15,10 +15,8 @@ Connect::Connect() : _portal(_server),
 Place the root page with the sketch application.&ensp;
 __AC_LINK__
 </body>
-</html>)");
+</html>)"));
 }
-
-Connect::~Connect() {}
 
 void Connect::begin(void) {
   // Responder of root page and apply page handled directly from WebServer class.

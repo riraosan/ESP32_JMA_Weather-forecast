@@ -4,8 +4,7 @@
 #include <unity.h>
 #include <memory>
 #include <secrets.h>
-//#include <WiFiClient.h>
-#include <HTTPClient.h>
+#include <WiFiClient.h>
 #include <Display.h>
 #include <Weather.h>
 #include <Connect.h>

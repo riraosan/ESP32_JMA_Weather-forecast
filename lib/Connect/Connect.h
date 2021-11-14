@@ -18,7 +18,6 @@ using WiFiWebServer = WebServer;
 class Connect : public Task {
  public:
   Connect();
-  virtual ~Connect();
   void begin(void);
   void begin(const char* SSID, const char* PASSWORD);
   void run(void* data);

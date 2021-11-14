@@ -8,7 +8,6 @@
 class Weather {
  public:
   Weather();
-  ~Weather();
 
   void   begin(WiFiClient &client);
   String getForecast(uint16_t local_gov_code);

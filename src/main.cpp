@@ -1,10 +1,9 @@
 // sample
-
 #include <WeatherDisplay.h>
 
 static WeatherDisplay app;
 
-//CORE1
+// CORE1
 void setup() {
   app.begin();
 }

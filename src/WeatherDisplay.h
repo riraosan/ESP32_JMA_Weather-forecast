@@ -6,6 +6,7 @@
 #include <Connect.h>
 #include <Display.h>
 #include <Weather.h>
+#include <WeatherCode.h>
 
 #include <Ticker.h>
 #include <ThingSpeak.h>
@@ -27,17 +28,25 @@ class WeatherDisplay {
                      _statusCode() {
   }
 
+  static void sendMessage(MESSAGE message) {
+    _message = message;
+  }
+
   static void setNtpTime(void) {
-    _ntpClock = true;
+    sendMessage(MESSAGE::MSG_CHECK_CLOCK);
+  }
+
+  static void dataCallback(void) {
+    sendMessage(MESSAGE::MSG_WRITE_DATA);
+  }
+
+  static void forcastCallback(void) {
+    sendMessage(MESSAGE::MSG_WRITE_FORCAST);
   }
 
   void beginNtpClock(void) {
     configTzTime(TIME_ZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
     _ntpclocker.attach_ms(500, setNtpTime);
-  }
-
-  static void timerCallback(void) {
-    _timer = true;
   }
 
   void getInformation(void) {
@@ -62,6 +71,17 @@ class WeatherDisplay {
     }
   }
 
+  void getWeatherForcast(void) {
+    log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    String result(_weather.getForecast(LOCAL_GOV_CODE));
+    if (result.isEmpty()) {
+      String forcastcode(_weather.getTodayForcast());
+      log_i("Success to get Forcast code: %s", forcastcode.c_str());
+
+      // TODO ここにDisplayクラスのGIFを描くメソッドを追加する
+    }
+  }
+
   void begin(void) {
     _wifi.setTaskName("AutoConnect");
     _wifi.setTaskSize(4096 * 1);
@@ -78,16 +98,18 @@ class WeatherDisplay {
     _weather.begin(_wifiClient);
 
 #if defined(TEST_PERIOD)
-    _serverChecker.attach(30, timerCallback);
+    _serverChecker.attach(30, dataCallback);
+    _forcastChecker.attach(30, forcastCallback);
 #else
-    _serverChecker.attach(60 * 10, timerCallback);
+    _serverChecker.attach(60 * 10, dataCallback);
+    _forcastChecker.attach(60 * 60, forcastCallback);
 #endif
 
     beginNtpClock();
 
     delay(5000);
     setNtpTime();
-    timerCallback();
+    dataCallback();
 
     _composite.begin(12, true, 16);
 
@@ -96,23 +118,31 @@ class WeatherDisplay {
 
   void update(void) {
     _composite.update();
-    if (_timer) {
-      getInformation();
-      _timer = false;
-    }
 
-    if (_ntpClock) {
-      time_t     t  = time(NULL);
-      struct tm* tm = localtime(&t);
+    switch (_message) {
+      case MESSAGE::MSG_CHECK_CLOCK: {
+        time_t     t  = time(NULL);
+        struct tm* tm = localtime(&t);
 
-      char buffer[16] = {0};
-      sprintf(buffer, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
+        char buffer[16] = {0};
+        sprintf(buffer, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-      _ntpTime = buffer;
+        _ntpTime = buffer;
 
-      _composite.setNtpTime(buffer);
-      _composite.sendMessage(MESSAGE::MSG_WRITE_DATA);
-      _ntpClock = false;
+        _composite.setNtpTime(_ntpTime);
+        _composite.sendMessage(MESSAGE::MSG_WRITE_DATA);
+        sendMessage(MESSAGE::MSG_NOTHING);
+      } break;
+      case MESSAGE::MSG_WRITE_DATA:
+        getInformation();
+        sendMessage(MESSAGE::MSG_NOTHING);
+        break;
+      case MESSAGE::MSG_WRITE_FORCAST:
+        getWeatherForcast();
+        sendMessage(MESSAGE::MSG_NOTHING);
+        break;
+      default:
+        break;
     }
   }
 
@@ -122,16 +152,14 @@ class WeatherDisplay {
   Weather _weather;
   Ticker  _serverChecker;
   Ticker  _ntpclocker;
-  Ticker  _weatherChecker;
+  Ticker  _forcastChecker;
 #if defined(TS_ENABLE_SSL)
   WiFiClientSecure _client;
 #else
   WiFiClient _wifiClient;
-  HTTPClient _client;
 #endif
 
-  static bool _timer;
-  static bool _ntpClock;
+  static MESSAGE _message;
 
 #if defined(TS_ENABLE_SSL)
   const char* _certificate;
@@ -142,5 +170,4 @@ class WeatherDisplay {
   String        _ntpTime;
 };
 
-bool WeatherDisplay::_timer    = false;
-bool WeatherDisplay::_ntpClock = false;
+MESSAGE WeatherDisplay::_message = MESSAGE::MSG_NOTHING;

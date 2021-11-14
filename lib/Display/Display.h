@@ -20,7 +20,7 @@ class Display {
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
   void setNtpTime(String ntpTime);
 
-  static void sendMessage(MESSAGE msg);
+  static void sendMessage(MESSAGE message);
 
 #if defined(ENABLE_ANIMATION)
   static void GIFDraw(GIFDRAW* pDraw);
