@@ -9,20 +9,11 @@
 #include <Weather.h>
 #include <Ticker.h>
 #include <ThingSpeak.h>
-#if defined(TS_ENABLE_SSL)
-#include <WiFiClientSecure.h>
-#else
-//#include <WiFiClient.h>
 #include <HTTPClient.h>
-#endif
 
 class WeatherDisplay {
  public:
-  WeatherDisplay() :
-#if defined(TS_ENABLE_SSL)
-                     _certificate(SECRET_TS_ROOT_CA),
-#endif
-                     _weatherStationChannelNumber(SECRET_CH_ID),
+  WeatherDisplay() : _weatherStationChannelNumber(SECRET_CH_ID),
                      _field{1, 2, 3, 4, 5, 6, 7, 8},
                      _statusCode() {
   }
@@ -72,6 +63,7 @@ class WeatherDisplay {
 
   void setWeatherForcast(void) {
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+
     String result(_weather.getForecast(LOCAL_GOV_CODE));
 
     if (result.isEmpty()) {
@@ -85,6 +77,7 @@ class WeatherDisplay {
   void setNtpClock(void) {
     char      buffer[16] = {0};
     struct tm info;
+
     if (getLocalTime(&info)) {
       sprintf(buffer, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
 
@@ -102,10 +95,6 @@ class WeatherDisplay {
     _wifi.setCore(0);
     _wifi.begin();
     _wifi.start(nullptr);
-
-#if defined(TS_ENABLE_SSL)
-    _client.setCACert(_certificate);
-#endif
 
     ThingSpeak.begin(_wifiClient);
     _weather.begin(_wifiClient);
@@ -131,21 +120,25 @@ class WeatherDisplay {
 
     switch (_message) {
       case MESSAGE::MSG_CHECK_CLOCK:
+
         setNtpClock();
 
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
       case MESSAGE::MSG_INIT_DATA:
+
         setInformation();
 
         sendMessage(MESSAGE::MSG_CHECK_FORCAST);
         break;
       case MESSAGE::MSG_CHECK_DATA:
+
         setInformation();
 
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
       case MESSAGE::MSG_CHECK_FORCAST:
+
         configTzTime(TIME_ZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
         setWeatherForcast();
 
@@ -157,23 +150,16 @@ class WeatherDisplay {
   }
 
  private:
-  Connect _wifi;
-  Display _composite;
-  Weather _weather;
-  Ticker  _serverChecker;
-  Ticker  _ntpclocker;
-  Ticker  _forcastChecker;
-#if defined(TS_ENABLE_SSL)
-  WiFiClientSecure _client;
-#else
+  Connect    _wifi;
+  Display    _composite;
+  Weather    _weather;
+  Ticker     _serverChecker;
+  Ticker     _ntpclocker;
+  Ticker     _forcastChecker;
   WiFiClient _wifiClient;
-#endif
 
   static MESSAGE _message;
 
-#if defined(TS_ENABLE_SSL)
-  const char* _certificate;
-#endif
   unsigned long _weatherStationChannelNumber;
   int           _field[8];
   int           _statusCode;

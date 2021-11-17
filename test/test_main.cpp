@@ -9,8 +9,8 @@
 #include <Weather.h>
 #include <Connect.h>
 
-//#define _DISPLAY
-#define _WEATHER
+#define _DISPLAY
+//#define _WEATHER
 
 Connect _wifi;
 #if defined(_DISPLAY)
@@ -31,21 +31,9 @@ void tearDown(void) {
 #endif
 }
 
-void weather_test_001(void) {
-  // TEST_ASSERT_EQUAL_STRING("test", "test");
-}
-
-void weather_test_002(void) {
-  // TEST_ASSERT_EQUAL_STRING("test", "test");
-}
-
-void weather_test_003(void) {
-  // TEST_ASSERT_EQUAL_STRING("test", "test1");
-}
-
 void weather_test_004(void) {
   String forcast(_weather.getForecast(27000));
-  //Serial.printf("%s\n", forcast.c_str());
+  // Serial.printf("%s\n", forcast.c_str());
 }
 
 void weather_test_005(void) {
@@ -60,24 +48,33 @@ void weather_test_006(void) {
 
 #if defined(_DISPLAY)
 void font_test1(void) {
+  _disp.videoOut->setTextWrap(true);
   _disp.videoOut->setTextSize(1);
   _disp.videoOut->setTextColor(0xFFFF, 0x0000);
+  _disp.videoOut->setCursor(2, 10);
 
   for (int i = 0; i < 14; i++) {
-    _disp.videoOut->printEfont("あいうえおあいうえおあいうえお", 2, 10 + 16 * i);
+    _disp.videoOut->printEfont("あいうえお");
   }
 }
 
 void font_test2(void) {
+  _disp.videoOut->setTextSize(1);
+  _disp.videoOut->setTextColor(0xFFFF, 0x0000);//RED
+  _disp.videoOut->setCursor(5, 10);
+  _disp.videoOut->printEfont("Font 1");
+}
+
+void font_test3(void) {
   _disp.videoOut->setTextSize(2);
-  _disp.videoOut->setTextColor(0xFFFF, 0x0000);
+  _disp.videoOut->setTextColor(0xFFFF, 0x0000);//BLUE
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->printEfont("Font 2");
 }
 
-void font_test3(void) {
+void font_test4(void) {
   _disp.videoOut->setTextSize(3);
-  _disp.videoOut->setTextColor(0xFFFF, 0x0000);
+  _disp.videoOut->setTextColor(0xFFFF, 0x0000);//YELLOW
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->printEfont("Font 3");
 }
@@ -86,12 +83,20 @@ void icon_test_100(void) {
   _disp.sendMessage(MESSAGE::MSG_WEATHER_100);
 }
 
+void icon_test_101(void) {
+  _disp.sendMessage(MESSAGE::MSG_WEATHER_101);
+}
+
 void icon_test_110(void) {
   _disp.sendMessage(MESSAGE::MSG_WEATHER_110);
 }
 
 void icon_test_200(void) {
   _disp.sendMessage(MESSAGE::MSG_WEATHER_200);
+}
+
+void icon_test_201(void) {
+  _disp.sendMessage(MESSAGE::MSG_WEATHER_201);
 }
 
 void icon_test_210(void) {
@@ -106,21 +111,25 @@ void icon_test_300(void) {
   _disp.sendMessage(MESSAGE::MSG_WEATHER_300);
 }
 
+void icon_test_302(void) {
+  _disp.sendMessage(MESSAGE::MSG_WEATHER_302);
+}
+
 void icon_test_313(void) {
   _disp.sendMessage(MESSAGE::MSG_WEATHER_313);
 }
 
 void endtest(void) {
+  _disp.videoOut->setTextSize(4);
   _disp.videoOut->fillScreen(0x03e0);
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->setTextColor(0xffff, 0x03e0);
-  _disp.videoOut->printEfont("テスト終了");
+  _disp.videoOut->printEfont("END");
 }
 #endif
 
 void setup() {
   // NOTE!!! Wait for >2 secs
-  // if board doesn't support software reset via Serial.DTR/RTS
   delay(2000);
 
   UNITY_BEGIN();  // IMPORTANT LINE!
@@ -138,9 +147,6 @@ void setup() {
 
   delay(1000);
 
-  // RUN_TEST(weather_test_001);
-  // RUN_TEST(weather_test_002);
-  // RUN_TEST(weather_test_003);
   RUN_TEST(weather_test_004);
   RUN_TEST(weather_test_005);
   RUN_TEST(weather_test_006);
@@ -161,10 +167,16 @@ void setup() {
   RUN_TEST(icon_test_100);
   delay(3000);
 
+  RUN_TEST(icon_test_101);
+  delay(3000);
+
+  RUN_TEST(icon_test_110);
+  delay(3000);
+
   RUN_TEST(icon_test_200);
   delay(3000);
 
-  RUN_TEST(icon_test_300);
+  RUN_TEST(icon_test_201);
   delay(3000);
 
   RUN_TEST(icon_test_210);
@@ -174,6 +186,9 @@ void setup() {
   delay(3000);
 
   RUN_TEST(icon_test_300);
+  delay(3000);
+
+  RUN_TEST(icon_test_302);
   delay(3000);
 
   RUN_TEST(icon_test_313);

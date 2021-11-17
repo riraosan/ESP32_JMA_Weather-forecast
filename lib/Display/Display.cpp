@@ -2,15 +2,16 @@
 #include <Display.h>
 #include <esp32-hal-log.h>
 
-#if defined(ENABLE_ANIMATION)
 #include "icon/100.h"
-#include "icon/200.h"
-#include "icon/300.h"
+#include "icon/101.h"
 #include "icon/110.h"
+#include "icon/200.h"
+#include "icon/201.h"
 #include "icon/210.h"
 #include "icon/212.h"
+#include "icon/300.h"
+#include "icon/302.h"
 #include "icon/313.h"
-#endif
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
@@ -45,8 +46,6 @@ void Display::sendMessage(MESSAGE message) {
 void Display::setNtpTime(String ntpTime) {
   _ntpTime = ntpTime;
 }
-
-void Display::begin(void) {}
 
 void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut.reset(new ESP_8_BIT_GFX(ntsc, colorDepth));
@@ -110,7 +109,6 @@ void Display::displayWeatherInfo(void) {
 }
 
 void Display::update() {
-#if defined(ENABLE_ANIMATION)
   switch (_message) {
     case MESSAGE::MSG_CHECK_DATA:
       displayWeatherInfo();
@@ -122,20 +120,26 @@ void Display::update() {
       }
       sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
-    case MESSAGE::MSG_WEATHER_200:
-      if (gif.open((uint8_t *)_200, size_200, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
-    case MESSAGE::MSG_WEATHER_300:
-      if (gif.open((uint8_t *)_300, size_300, GIFDraw)) {
+    case MESSAGE::MSG_WEATHER_101:
+      if (gif.open((uint8_t *)_101, size_101, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_110:
       if (gif.open((uint8_t *)_110, size_110, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
+      break;
+    case MESSAGE::MSG_WEATHER_200:
+      if (gif.open((uint8_t *)_200, size_200, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
+      break;
+    case MESSAGE::MSG_WEATHER_201:
+      if (gif.open((uint8_t *)_201, size_201, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       sendMessage(MESSAGE::MSG_GIF_CLOSE);
@@ -148,6 +152,18 @@ void Display::update() {
       break;
     case MESSAGE::MSG_WEATHER_212:
       if (gif.open((uint8_t *)_212, size_212, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
+      break;
+    case MESSAGE::MSG_WEATHER_300:
+      if (gif.open((uint8_t *)_300, size_300, GIFDraw)) {
+        gif.playFrame(true, NULL);
+      }
+      sendMessage(MESSAGE::MSG_GIF_CLOSE);
+      break;
+    case MESSAGE::MSG_WEATHER_302:
+      if (gif.open((uint8_t *)_302, size_302, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
       sendMessage(MESSAGE::MSG_GIF_CLOSE);
@@ -166,21 +182,8 @@ void Display::update() {
       break;
   }
   videoOut->waitForFrame();
-#else
-  switch (_message) {
-    case MESSAGE::MSG_WEATHER_BUFFER:
-      displayWeatherInfo();
-      _message = MESSAGE::MSG_NOTHING;
-      break;
-    default:
-      _message = MESSAGE::MSG_NOTHING;
-  }
-  videoOut->waitForFrame();
-#endif
-  // delay(1);
 }
 
-#if defined(ENABLE_ANIMATION)
 void Display::GIFDraw(GIFDRAW *pDraw) {
   uint8_t  *s;
   uint16_t *d, *usPalette, usTemp[320];
@@ -249,4 +252,3 @@ void Display::GIFDraw(GIFDRAW *pDraw) {
     }
   }
 }
-#endif

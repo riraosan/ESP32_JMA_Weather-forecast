@@ -3,16 +3,13 @@
 
 #include <memory>
 #include <Arduino.h>
-#if defined(ENABLE_ANIMATION)
 #include <AnimatedGIF.h>
-#endif
 #include <ESP_8_BIT_GFX.h>
 #include <WeatherCode.h>
 
 class Display {
  public:
   Display(void);
-  void begin(void);
   void begin(uint16_t irPin, bool ntsc, uint8_t colorDepth);
   void update(void);
   void setTextOffset(int16_t x, int16_t y);
@@ -22,10 +19,8 @@ class Display {
 
   static void sendMessage(MESSAGE message);
 
-#if defined(ENABLE_ANIMATION)
   static void GIFDraw(GIFDRAW* pDraw);
   AnimatedGIF gif;
-#endif
 
   static std::unique_ptr<ESP_8_BIT_GFX> videoOut;
 
