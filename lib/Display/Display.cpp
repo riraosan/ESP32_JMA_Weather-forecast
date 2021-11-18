@@ -145,6 +145,7 @@ void Display::update() {
       sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_210:
+    case MESSAGE::MSG_WEATHER_211:
       if (gif.open((uint8_t *)_210, size_210, GIFDraw)) {
         gif.playFrame(true, NULL);
       }

@@ -17,7 +17,8 @@ enum class MESSAGE : uint32_t {
   MSG_WEATHER_110 = 110,  //晴れのち曇り
   MSG_WEATHER_200 = 200,  //曇り
   MSG_WEATHER_201 = 201,  //
-  MSG_WEATHER_210 = 210,  //曇りのち晴れ
+  MSG_WEATHER_210 = 210,  //曇り のち 晴れ
+  MSG_WEATHER_211 = 211,  //曇り のち ときどき 晴れ
   MSG_WEATHER_212 = 212,  //曇りのち雨
   MSG_WEATHER_300 = 300,  //雨
   MSG_WEATHER_302 = 302,  //
