@@ -140,17 +140,21 @@ void setup() {
   _wifi.setCore(0);
   _wifi.begin(SECRET_SSID, SECRET_PASS);
   _wifi.start(nullptr);
-
   delay(5000);
 
+#if 0
   _weather.begin(_client);
-
-  delay(1000);
+  delay(3000);
 
   RUN_TEST(weather_test_004);
-  RUN_TEST(weather_test_005);
-  RUN_TEST(weather_test_006);
+  delay(3000);
 
+  RUN_TEST(weather_test_005);
+  delay(3000);
+
+  RUN_TEST(weather_test_006);
+  delay(3000);
+#endif
 #if defined(_DISPLAY)
   _disp.begin(12, true, 16);
   _disp.sendMessage(MESSAGE::MSG_NOTHING);

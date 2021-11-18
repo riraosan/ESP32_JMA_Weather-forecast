@@ -10,15 +10,15 @@ class Weather {
   Weather();
 
   void   begin(WiFiClient &client);
-  String getForecast(uint16_t local_gov_code);
-  String createRequest(uint16_t local_gov_code);
+  void   setAreaCode(uint16_t localGovernmentCode);
+  String getForecast(void);
   String getTodayForcast(void);
   String getNextdayForcast(void);
   void   update();
 
  private:
-  String _createRequest(uint16_t local_gov_code);
-  String _createURL(uint16_t local_gov_code);
+  String   _createURL(uint16_t localGovernmentCode);
+  uint16_t _localGovernmentCode;
 
   String _request;
   String _response;
@@ -29,9 +29,12 @@ class Weather {
   String _user_agent;
   String _connection;
 
+  String _areaName;
   String _areaCode;
   String _todayForcast;
   String _nextdayForcast;
+  String _weathers0;
+  String _weathers1;
 
   WiFiClient _wifiClient;
   HTTPClient _httpClient;

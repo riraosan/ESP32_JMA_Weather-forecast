@@ -63,8 +63,7 @@ class WeatherDisplay {
 
   void setWeatherForcast(void) {
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
-
-    String result(_weather.getForecast(LOCAL_GOV_CODE));
+    String result(_weather.getForecast());
 
     if (result.isEmpty()) {
       String forcastcode(_weather.getTodayForcast());
@@ -93,11 +92,13 @@ class WeatherDisplay {
     _wifi.setTaskSize(4096 * 1);
     _wifi.setTaskPriority(2);
     _wifi.setCore(0);
-    _wifi.begin();
+    _wifi.begin(SECRET_SSID, SECRET_PASS);
     _wifi.start(nullptr);
 
     ThingSpeak.begin(_wifiClient);
+
     _weather.begin(_wifiClient);
+    _weather.setAreaCode(LOCAL_GOV_CODE);
 
 #if defined(TEST_PERIOD)
     _serverChecker.attach(20, dataCallback);

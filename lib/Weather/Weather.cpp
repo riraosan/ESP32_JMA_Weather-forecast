@@ -14,33 +14,18 @@ void Weather::begin(WiFiClient& client) {
   _wifiClient = client;
 }
 
-String Weather::createRequest(uint16_t local_gov_code) {
-  String code(local_gov_code);
-  code += "0.json";
-  _line.replace("__WEATHER_CODE__", code);
-
-  _request = _line +
-             "Host: " + _host + "\r\n" +
-             _user_agent +
-             _connection + "\r\n";
-
-  log_i("%s", _request.c_str());
-
-  return _request;
+void Weather::setAreaCode(uint16_t localGovernmentCode) {
+  _localGovernmentCode = localGovernmentCode;
 }
 
-String Weather::_createURL(uint16_t local_gov_code) {
-  String code(local_gov_code);
-  code += "0.json";
-  _url.replace("__WEATHER_CODE__", code);
+String Weather::getForecast(void) {
+  String url;
 
-  log_i("%s", _url.c_str());
-
-  return _url;
-}
-
-String Weather::getForecast(uint16_t local_gov_code) {
-  String url(_createURL(local_gov_code));
+  if (_localGovernmentCode) {
+    url = _createURL(_localGovernmentCode);
+  } else {
+    return url.c_str();
+  }
 
   _httpClient.setReuse(false);
   _httpClient.begin(_wifiClient, url);
@@ -68,28 +53,30 @@ String Weather::getForecast(uint16_t local_gov_code) {
       const char* publishingOffice = root_0["publishingOffice"];
       const char* reportDatetime   = root_0["reportDatetime"];
 
-      log_i("publishingOffice %s", publishingOffice);
-      log_i("reportDatetime   %s", reportDatetime);
+      log_i("publishingOffice  %s", publishingOffice);
+      log_i("reportDatetime    %s", reportDatetime);
 
       JsonArray   root_0_timeSeries = root_0["timeSeries"];
       const char* area_name         = root_0_timeSeries[0]["areas"][0]["area"]["name"];
       const char* area_code         = root_0_timeSeries[0]["areas"][0]["area"]["code"];
-      log_i("area_name %s", area_name);
-      log_i("area_code %s", area_code);
 
       JsonArray weatherCodes = root_0_timeSeries[0]["areas"][0]["weatherCodes"];
       JsonArray weathers     = root_0_timeSeries[0]["areas"][0]["weathers"];
-      if (weatherCodes[0] != nullptr) {
-        log_i("weatherCodes %s", (const char*)weatherCodes[0]);
-        log_i("weatherCodes %s", (const char*)weatherCodes[1]);
 
+      if (root_0_timeSeries[0] != nullptr) {
+        _areaName       = (const char*)area_name;
+        _areaCode       = (const char*)area_code;
         _todayForcast   = (const char*)weatherCodes[0];
         _nextdayForcast = (const char*)weatherCodes[1];
-      }
+        _weathers0      = (const char*)weathers[0];
+        _weathers1      = (const char*)weathers[1];
 
-      if (weathers[0] != nullptr) {
-        log_i("weathers[0] %s", (const char*)weathers[0]);
-        log_i("weathers[1] %s", (const char*)weathers[1]);
+        log_i("      area_name %s", _areaName.c_str());
+        log_i("      area_code %s", _areaCode.c_str());
+        log_i("weatherCodes[0] %s", _todayForcast.c_str());
+        log_i("weatherCodes[1] %s", _nextdayForcast.c_str());
+        log_i("    weathers[0] %s", _weathers0.c_str());
+        log_i("    weathers[1] %s", _weathers1.c_str());
       }
 
       _httpClient.end();
@@ -111,6 +98,16 @@ String Weather::getTodayForcast(void) {
 
 String Weather::getNextdayForcast(void) {
   return _nextdayForcast;
+}
+
+String Weather::_createURL(uint16_t localGovernmentCode) {
+  String code(localGovernmentCode);
+  code += "0.json";
+  _url.replace("__WEATHER_CODE__", code);
+
+  log_i("%s", _url.c_str());
+
+  return _url;
 }
 
 void Weather::update() {
