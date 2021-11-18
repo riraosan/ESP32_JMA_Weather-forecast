@@ -32,7 +32,7 @@ void tearDown(void) {
 }
 
 void weather_test_004(void) {
-  String forcast(_weather.getForecast(27000));
+  String forcast(_weather.getForecast());
   // Serial.printf("%s\n", forcast.c_str());
 }
 
@@ -144,6 +144,7 @@ void setup() {
 
 #if 0
   _weather.begin(_client);
+  _weather.setAreaCode(27000);
   delay(3000);
 
   RUN_TEST(weather_test_004);
