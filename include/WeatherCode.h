@@ -24,6 +24,6 @@ enum class MESSAGE : uint32_t {
   MSG_WEATHER_300 = 300,  // 雨
   MSG_WEATHER_302 = 302,  // 雨   時々 止む
   MSG_WEATHER_313 = 313,  // 雨   のち 曇り
-  MSG_GIF_CLOSE,
+  MSG_OPEN_GIFFILE,
   MSG_MAX = 9999
 };

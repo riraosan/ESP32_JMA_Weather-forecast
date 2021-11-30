@@ -3,7 +3,7 @@
 #include <esp32-hal-log.h>
 
 #include "icon/100.h"
-#include "icon/101.h"
+//#include "icon/101.h"
 #include "icon/110.h"
 #include "icon/200.h"
 #include "icon/201.h"
@@ -14,6 +14,8 @@
 #include "icon/313.h"
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
+
+File Display::_file;
 
 int16_t Display::_textOffset_x = 0;
 int16_t Display::_textOffset_y = 10;
@@ -82,20 +84,20 @@ void Display::displayWeatherInfo(void) {
   sprintf(humid, " %2.0f", _humidity);
   sprintf(press, " %4.1f", _pressure);
 
-  //気温
+  // 気温
   videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 12);
   videoOut->setTextColor(0xFFFF, _bgTemperature);
   videoOut->setTextSize(1);
   videoOut->printEfont(tempe);
   videoOut->printEfont("℃");
 
-  //湿度
+  // 湿度
   videoOut->setTextColor(0xFFFF, _bgHumidity);
   videoOut->setTextSize(1);
   videoOut->printEfont(humid);
   videoOut->printEfont("％");
 
-  //大気圧
+  // 大気圧
   videoOut->setTextColor(0xFFFF, _bgPressure);
   videoOut->setTextSize(1);
   videoOut->printEfont(press);
@@ -109,79 +111,42 @@ void Display::displayWeatherInfo(void) {
 }
 
 void Display::update() {
+  char     filename[256] = {0};
+  uint32_t weatherCodes  = 0;
+
   switch (_message) {
     case MESSAGE::MSG_CHECK_DATA:
       displayWeatherInfo();
+
       sendMessage(MESSAGE::MSG_NOTHING);
-      break;
-    case MESSAGE::MSG_WEATHER_100:
-      if (gif.open((uint8_t *)_100, size_100, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
-    case MESSAGE::MSG_WEATHER_101:
-      if (gif.open((uint8_t *)_101, size_101, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
-    case MESSAGE::MSG_WEATHER_110:
-      if (gif.open((uint8_t *)_110, size_110, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
-    case MESSAGE::MSG_WEATHER_200:
-      if (gif.open((uint8_t *)_200, size_200, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
-    case MESSAGE::MSG_WEATHER_201:
-      if (gif.open((uint8_t *)_201, size_201, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
       break;
     case MESSAGE::MSG_WEATHER_210:
     case MESSAGE::MSG_WEATHER_211:
-      if (gif.open((uint8_t *)_210, size_210, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
+    case MESSAGE::MSG_WEATHER_100:
+    case MESSAGE::MSG_WEATHER_101:
+    case MESSAGE::MSG_WEATHER_110:
+    case MESSAGE::MSG_WEATHER_200:
+    case MESSAGE::MSG_WEATHER_201:
     case MESSAGE::MSG_WEATHER_212:
-      if (gif.open((uint8_t *)_212, size_212, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
     case MESSAGE::MSG_WEATHER_300:
-      if (gif.open((uint8_t *)_300, size_300, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
     case MESSAGE::MSG_WEATHER_302:
-      if (gif.open((uint8_t *)_302, size_302, GIFDraw)) {
-        gif.playFrame(true, NULL);
-      }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
     case MESSAGE::MSG_WEATHER_313:
-      if (gif.open((uint8_t *)_313, size_313, GIFDraw)) {
+      sprintf(filename, "%d.gif", (uint32_t)_message);
+
+      sendMessage(MESSAGE::MSG_OPEN_GIFFILE);
+      break;
+    case MESSAGE::MSG_OPEN_GIFFILE:
+      if (gif.open(filename, GIFOpenFile, GIFCloseFile, GIFReadFile, GIFSeekFile, GIFDraw)) {
         gif.playFrame(true, NULL);
       }
-      sendMessage(MESSAGE::MSG_GIF_CLOSE);
-      break;
-    case MESSAGE::MSG_GIF_CLOSE:
+
       gif.close();
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
     default:
       break;
   }
+
   videoOut->waitForFrame();
   delay(1);
 }
