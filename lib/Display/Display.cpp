@@ -183,6 +183,7 @@ void Display::update() {
       break;
   }
   videoOut->waitForFrame();
+  delay(1);
 }
 
 void Display::GIFDraw(GIFDRAW *pDraw) {

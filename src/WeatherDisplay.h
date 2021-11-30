@@ -1,3 +1,11 @@
+/**
+ *
+ *  @file   WeatherDisplay.h
+ *  @author @riraosan
+ *  @version    0.0.1
+ *  @date   2021-11-20
+ *  @copyright  MIT license.
+ */
 
 #pragma once
 
@@ -20,6 +28,11 @@ class WeatherDisplay {
 
   static void sendMessage(MESSAGE message) {
     _message = message;
+  }
+
+  static void restart(void) {
+    ESP.restart();
+    delay(1000);
   }
 
   static void setNtpTime(void) {
@@ -97,8 +110,8 @@ class WeatherDisplay {
 
     ThingSpeak.begin(_wifiClient);
 
-    _weather.begin(_wifiClient);
     _weather.setAreaCode(LOCAL_GOV_CODE);
+    _weather.begin(_wifiClient);
 
 #if defined(TEST_PERIOD)
     _serverChecker.attach(20, dataCallback);
@@ -108,7 +121,7 @@ class WeatherDisplay {
     _forcastChecker.attach(60 * 60, forcastCallback);
 #endif
 
-    // delay(10000);
+    _reboot.attach(60 * 60 * 12, restart);
     beginNtpClock();
 
     _composite.begin(12, true, 16);
@@ -120,12 +133,6 @@ class WeatherDisplay {
     _composite.update();
 
     switch (_message) {
-      case MESSAGE::MSG_CHECK_CLOCK:
-
-        setNtpClock();
-
-        sendMessage(MESSAGE::MSG_NOTHING);
-        break;
       case MESSAGE::MSG_INIT_DATA:
 
         setInformation();
@@ -140,7 +147,6 @@ class WeatherDisplay {
         break;
       case MESSAGE::MSG_CHECK_FORCAST:
 
-        configTzTime(TIME_ZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
         setWeatherForcast();
 
         sendMessage(MESSAGE::MSG_NOTHING);
@@ -148,6 +154,16 @@ class WeatherDisplay {
       default:
         break;
     }
+
+    switch (_message) {
+      case MESSAGE::MSG_CHECK_CLOCK:
+        setNtpClock();
+        break;
+      default:
+        break;
+    }
+
+    delay(1);
   }
 
  private:
@@ -157,6 +173,7 @@ class WeatherDisplay {
   Ticker     _serverChecker;
   Ticker     _ntpclocker;
   Ticker     _forcastChecker;
+  Ticker     _reboot;
   WiFiClient _wifiClient;
 
   static MESSAGE _message;

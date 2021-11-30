@@ -22,12 +22,7 @@ class Weather {
 
   String _request;
   String _response;
-
   String _url;
-  String _line;
-  String _host;
-  String _user_agent;
-  String _connection;
 
   String _areaName;
   String _areaCode;

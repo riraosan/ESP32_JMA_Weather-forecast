@@ -9,31 +9,22 @@
 #include <Weather.h>
 #include <Connect.h>
 
-#define _DISPLAY
-//#define _WEATHER
-
-Connect _wifi;
-#if defined(_DISPLAY)
-Display _disp;
-#endif
+Connect    _wifi;
+Display    _disp;
 WiFiClient _client;
 Weather    _weather;
 
 void setUp(void) {
-#if defined(_DISPLAY)
   _disp.videoOut->fillScreen(0x0000);
-#endif
 }
 
 void tearDown(void) {
-#if defined(_DISPLAY)
   _disp.update();
-#endif
 }
 
 void weather_test_004(void) {
   String forcast(_weather.getForecast());
-  // Serial.printf("%s\n", forcast.c_str());
+  Serial.printf("%s\n", forcast.c_str());
 }
 
 void weather_test_005(void) {
@@ -46,7 +37,6 @@ void weather_test_006(void) {
   Serial.printf("nextday:%s\n", nextday.c_str());
 }
 
-#if defined(_DISPLAY)
 void font_test1(void) {
   _disp.videoOut->setTextWrap(true);
   _disp.videoOut->setTextSize(1);
@@ -119,6 +109,14 @@ void icon_test_313(void) {
   _disp.sendMessage(MESSAGE::MSG_WEATHER_313);
 }
 
+void starttest(void) {
+  _disp.videoOut->setTextSize(4);
+  _disp.videoOut->fillScreen(0x03e0);
+  _disp.videoOut->setCursor(5, 10);
+  _disp.videoOut->setTextColor(0xffff, 0x03e0);
+  _disp.videoOut->printEfont("START");
+}
+
 void endtest(void) {
   _disp.videoOut->setTextSize(4);
   _disp.videoOut->fillScreen(0x03e0);
@@ -126,7 +124,6 @@ void endtest(void) {
   _disp.videoOut->setTextColor(0xffff, 0x03e0);
   _disp.videoOut->printEfont("END");
 }
-#endif
 
 void setup() {
   // NOTE!!! Wait for >2 secs
@@ -143,8 +140,8 @@ void setup() {
   delay(5000);
 
 #if 0
-  _weather.begin(_client);
   _weather.setAreaCode(27000);
+  _weather.begin(_client);
   delay(3000);
 
   RUN_TEST(weather_test_004);
@@ -156,9 +153,12 @@ void setup() {
   RUN_TEST(weather_test_006);
   delay(3000);
 #endif
-#if defined(_DISPLAY)
+
   _disp.begin(12, true, 16);
   _disp.sendMessage(MESSAGE::MSG_NOTHING);
+
+  starttest();
+  delay(3000);
 
   RUN_TEST(font_test1);
   delay(3000);
@@ -200,12 +200,11 @@ void setup() {
   delay(3000);
 
   endtest();
-#endif
+
   UNITY_END();  // stop unit testing
 }
 
 void loop() {
-#if defined(_DISPLAY)
   _disp.update();
-#endif
+  delay(1);
 }

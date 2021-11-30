@@ -2,7 +2,7 @@
     //https://clang.llvm.org/docs/ClangFormatStyleOptions.html
     "C_Cpp.clang_format_style": "{BasedOnStyle: Google, ColumnLimit: 0, BreakStringLiterals: false, AlignConsecutiveDeclarations: true, AlignConsecutiveAssignments: true, AlignConsecutiveMacros: AcrossEmptyLinesAndComments, AlwaysBreakBeforeMultilineStrings: false}",
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: Google, ColumnLimit: 0, BreakStringLiterals: false, AlignConsecutiveDeclarations: true, AlignConsecutiveAssignments: true, AlignConsecutiveMacros: AcrossEmptyLinesAndComments, AlwaysBreakBeforeMultilineStrings: false}",
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     "editor.formatOnType": true,
     "editor.formatOnPaste": true,
     "editor.tabSize": 2,

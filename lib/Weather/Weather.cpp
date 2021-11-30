@@ -2,11 +2,7 @@
 #include <esp32-hal-log.h>
 #include <filter.h>
 
-Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__WEATHER_CODE__"),
-                     _line("GET /bosai/forecast/data/forecast/__WEATHER_CODE__ HTTP/1.1\r\n"),
-                     _host("www.jma.go.jp"),
-                     _user_agent("User-Agent: ESP32-PICO\r\n"),
-                     _connection("Connection: close\r\n") {
+Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__WEATHER_CODE__0.json") {
   deserializeJson(_filter, filter);
 }
 
@@ -27,7 +23,7 @@ String Weather::getForecast(void) {
     return url.c_str();
   }
 
-  _httpClient.setReuse(false);
+  _httpClient.setReuse(true);
   _httpClient.begin(_wifiClient, url);
 
   int httpCode = _httpClient.GET();
@@ -102,13 +98,12 @@ String Weather::getNextdayForcast(void) {
 
 String Weather::_createURL(uint16_t localGovernmentCode) {
   String code(localGovernmentCode);
-  code += "0.json";
   _url.replace("__WEATHER_CODE__", code);
 
-  log_i("%s", _url.c_str());
-
+  log_d("%s", _url.c_str());
   return _url;
 }
 
 void Weather::update() {
+  delay(1);
 }
