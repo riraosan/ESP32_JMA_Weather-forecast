@@ -23,7 +23,7 @@ class WeatherDisplay {
  public:
   WeatherDisplay() : _weatherStationChannelNumber(SECRET_CH_ID),
                      _field{1, 2, 3, 4, 5, 6, 7, 8},
-                     _statusCode() {
+                     _statusCode(0) {
   }
 
   static void sendMessage(MESSAGE message) {
@@ -36,7 +36,7 @@ class WeatherDisplay {
   }
 
   static void setNtpTime(void) {
-    sendMessage(MESSAGE::MSG_CHECK_CLOCK);
+    _clock = true;
   }
 
   static void dataCallback(void) {
@@ -67,8 +67,9 @@ class WeatherDisplay {
       String createdAt   = ThingSpeak.getCreatedAt();              // Created-at timestamp
 
       log_i("[%s] %2.1f*C, %2.1f%%, %4.1fhPa", createdAt.c_str(), temperature, humidity, pressure);
+
       _composite.setWeatherInfo(temperature, humidity, pressure, createdAt);
-      _composite.sendMessage(MESSAGE::MSG_CHECK_DATA);
+      _composite.sendMessage(MESSAGE::MSG_DISPLAY_DATA);
     } else {
       log_e("Problem reading channel. HTTP error code %d", _statusCode);
     }
@@ -82,7 +83,8 @@ class WeatherDisplay {
       String forcastcode(_weather.getTodayForcast());
       log_i("Success to get Forcast code: %s", forcastcode.c_str());
 
-      _composite.sendMessage((MESSAGE)forcastcode.toInt());
+      _composite.setWeatherCode(forcastcode.toInt());
+      _composite.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
     }
   }
 
@@ -96,8 +98,9 @@ class WeatherDisplay {
       _ntpTime = buffer;
 
       _composite.setNtpTime(_ntpTime);
-      _composite.sendMessage(MESSAGE::MSG_CHECK_DATA);
+      _composite.sendMessage(MESSAGE::MSG_DISPLAY_CLOCK);
     }
+    _clock = false;
   }
 
   void begin(void) {
@@ -130,6 +133,10 @@ class WeatherDisplay {
   }
 
   void update(void) {
+    if (_clock) {
+      setNtpClock();
+    }
+
     _composite.update();
 
     switch (_message) {
@@ -154,34 +161,28 @@ class WeatherDisplay {
       default:
         break;
     }
-
-    switch (_message) {
-      case MESSAGE::MSG_CHECK_CLOCK:
-        setNtpClock();
-        break;
-      default:
-        break;
-    }
-
     delay(1);
   }
 
  private:
-  Connect    _wifi;
-  Display    _composite;
-  Weather    _weather;
+  WiFiClient _wifiClient;
   Ticker     _serverChecker;
   Ticker     _ntpclocker;
   Ticker     _forcastChecker;
   Ticker     _reboot;
-  WiFiClient _wifiClient;
 
-  static MESSAGE _message;
+  Connect _wifi;
+  Display _composite;
+  Weather _weather;
 
   unsigned long _weatherStationChannelNumber;
   int           _field[8];
   int           _statusCode;
   String        _ntpTime;
+
+  static MESSAGE _message;
+  static bool    _clock;
 };
 
 MESSAGE WeatherDisplay::_message = MESSAGE::MSG_NOTHING;
+bool    WeatherDisplay::_clock   = false;

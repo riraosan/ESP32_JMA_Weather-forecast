@@ -8,19 +8,20 @@
 #include <Display.h>
 #include <Weather.h>
 #include <Connect.h>
+#include <codes.h>
+#include <ArduinoJson.h>
+#include <esp32-hal-log.h>
 
 Connect    _wifi;
 Display    _disp;
 WiFiClient _client;
 Weather    _weather;
 
-void setUp(void) {
-  _disp.videoOut->fillScreen(0x0000);
-}
+StaticJsonDocument<25000> _doc;
 
-void tearDown(void) {
-  _disp.update();
-}
+void setUp(void) {}
+
+void tearDown(void) {}
 
 void weather_test_004(void) {
   String forcast(_weather.getForecast());
@@ -46,67 +47,32 @@ void font_test1(void) {
   for (int i = 0; i < 14; i++) {
     _disp.videoOut->printEfont("あいうえお");
   }
+
+  _disp.update();
 }
 
 void font_test2(void) {
   _disp.videoOut->setTextSize(1);
-  _disp.videoOut->setTextColor(0xFFFF, 0x0000);//RED
+  _disp.videoOut->setTextColor(0xFFFF, 0x0000);  // RED
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->printEfont("Font 1");
+  _disp.update();
 }
 
 void font_test3(void) {
   _disp.videoOut->setTextSize(2);
-  _disp.videoOut->setTextColor(0xFFFF, 0x0000);//BLUE
+  _disp.videoOut->setTextColor(0xFFFF, 0x0000);  // BLUE
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->printEfont("Font 2");
+  _disp.update();
 }
 
 void font_test4(void) {
   _disp.videoOut->setTextSize(3);
-  _disp.videoOut->setTextColor(0xFFFF, 0x0000);//YELLOW
+  _disp.videoOut->setTextColor(0xFFFF, 0x0000);  // YELLOW
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->printEfont("Font 3");
-}
-
-void icon_test_100(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_100);
-}
-
-void icon_test_101(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_101);
-}
-
-void icon_test_110(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_110);
-}
-
-void icon_test_200(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_200);
-}
-
-void icon_test_201(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_201);
-}
-
-void icon_test_210(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_210);
-}
-
-void icon_test_212(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_212);
-}
-
-void icon_test_300(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_300);
-}
-
-void icon_test_302(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_302);
-}
-
-void icon_test_313(void) {
-  _disp.sendMessage(MESSAGE::MSG_WEATHER_313);
+  _disp.update();
 }
 
 void starttest(void) {
@@ -115,6 +81,44 @@ void starttest(void) {
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->setTextColor(0xffff, 0x03e0);
   _disp.videoOut->printEfont("START");
+  _disp.update();
+}
+
+void parse_weathercode(void) {
+  DeserializationError error = deserializeJson(_doc, weatherCodes);
+
+  if (error) {
+    log_e("deserializeJson() failed: ");
+    log_e("%s", error.c_str());
+    return;
+  }
+
+  for (int i = 100; i < 451; i++) {
+    String    code(i);
+    JsonArray root = _doc[(const char*)code.c_str()];
+
+    if (root.isNull() == false) {
+      log_printf("%d, ", i);                   // weather code
+      log_printf("MSG_WEATHER_CODE_%d, ", i);  // weather code
+
+      const char* root_0 = root[0];  // "100.svg"
+      log_printf("%s, ", root_0);
+      const char* root_1 = root[1];  // "500.svg"
+      log_printf("%s, ", root_1);
+      const char* root_2 = root[2];  // "100"
+      log_printf("%s, ", root_2);
+      const char* root_3 = root[3];  // "晴"
+      log_printf("%s, ", root_3);
+      const char* root_4 = root[4];  // "CLEAR"
+      log_printf("%s\n", root_4);
+
+      _disp.setWeatherCode(i);
+      _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
+      _disp.update();
+
+      delay(3000);
+    }
+  }
 }
 
 void endtest(void) {
@@ -123,6 +127,7 @@ void endtest(void) {
   _disp.videoOut->setCursor(5, 10);
   _disp.videoOut->setTextColor(0xffff, 0x03e0);
   _disp.videoOut->printEfont("END");
+  _disp.update();
 }
 
 void setup() {
@@ -131,6 +136,7 @@ void setup() {
 
   UNITY_BEGIN();  // IMPORTANT LINE!
 
+#if 0
   _wifi.setTaskName("AutoConnect");
   _wifi.setTaskSize(4096 * 1);
   _wifi.setTaskPriority(2);
@@ -138,6 +144,9 @@ void setup() {
   _wifi.begin(SECRET_SSID, SECRET_PASS);
   _wifi.start(nullptr);
   delay(5000);
+#endif
+
+  RUN_TEST(parse_weathercode);
 
 #if 0
   _weather.setAreaCode(27000);
@@ -154,6 +163,7 @@ void setup() {
   delay(3000);
 #endif
 
+#if 1
   _disp.begin(12, true, 16);
   _disp.sendMessage(MESSAGE::MSG_NOTHING);
 
@@ -169,37 +179,8 @@ void setup() {
   RUN_TEST(font_test3);
   delay(3000);
 
-  RUN_TEST(icon_test_100);
-  delay(3000);
-
-  RUN_TEST(icon_test_101);
-  delay(3000);
-
-  RUN_TEST(icon_test_110);
-  delay(3000);
-
-  RUN_TEST(icon_test_200);
-  delay(3000);
-
-  RUN_TEST(icon_test_201);
-  delay(3000);
-
-  RUN_TEST(icon_test_210);
-  delay(3000);
-
-  RUN_TEST(icon_test_212);
-  delay(3000);
-
-  RUN_TEST(icon_test_300);
-  delay(3000);
-
-  RUN_TEST(icon_test_302);
-  delay(3000);
-
-  RUN_TEST(icon_test_313);
-  delay(3000);
-
   endtest();
+#endif
 
   UNITY_END();  // stop unit testing
 }
