@@ -49,7 +49,7 @@ String Weather::getForecast(void) {
       const char* reportDatetime   = root_0["reportDatetime"];
 
       log_i("publishingOffice  %s", publishingOffice);
-      log_i("reportDatetime    %s", reportDatetime);
+      log_i("  reportDatetime  %s", reportDatetime);
 
       JsonArray   root_0_timeSeries = root_0["timeSeries"];
       const char* area_name         = root_0_timeSeries[0]["areas"][0]["area"]["name"];
@@ -66,12 +66,12 @@ String Weather::getForecast(void) {
         _weathers0      = (const char*)weathers[0];
         _weathers1      = (const char*)weathers[1];
 
-        log_i("      area_name %s", _areaName.c_str());
-        log_i("      area_code %s", _areaCode.c_str());
-        log_i("weatherCodes[0] %s", _todayForcast.c_str());
-        log_i("weatherCodes[1] %s", _nextdayForcast.c_str());
-        log_i("    weathers[0] %s", _weathers0.c_str());
-        log_i("    weathers[1] %s", _weathers1.c_str());
+        log_i("       area_name  %s", _areaName.c_str());
+        log_i("       area_code  %s", _areaCode.c_str());
+        log_i(" weatherCodes[0]  %s", _todayForcast.c_str());
+        log_i(" weatherCodes[1]  %s", _nextdayForcast.c_str());
+        log_i("     weathers[0]  %s", _weathers0.c_str());
+        log_i("     weathers[1]  %s", _weathers1.c_str());
       }
 
       _httpClient.end();

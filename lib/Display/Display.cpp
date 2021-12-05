@@ -21,7 +21,8 @@ Display::Display() : _temperature(0.0),
                      _bgTitle(0x0019),
                      _bgTemperature(_bgColor),
                      _bgPressure(_bgColor),
-                     _bgHumidity(_bgColor) {
+                     _bgHumidity(_bgColor),
+                     _filename("") {
   deserializeJson(_doc, weatherCodes);
 }
 
@@ -40,13 +41,15 @@ void Display::setNtpTime(String ntpTime) {
 
 void Display::setWeatherCode(uint32_t weatherCode) {
   _weatherCode   = weatherCode;
-  JsonArray root = _doc[String(weatherCodes).c_str()];
+  JsonArray root = _doc[(const char *)String(_weatherCode).c_str()];
 
-  _filename   = (const char *)root[0];  // "100."gif
-  _forcast_jp = (const char *)root[3];  // "晴"
-  _forcast_en = (const char *)root[4];  // "CLEAR"
+  if (root.isNull() == false) {
+    _filename   = String("/") + String((const char *)root[0]);  // "100.gif"
+    _forcast_jp = (const char *)root[3];                        // "晴"
+    _forcast_en = (const char *)root[4];                        // "CLEAR"
 
-  log_i("weather code = %d, %s, %s, %s", weatherCodes, _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
+    log_i("weather code = %d, %s, %s, %s", _weatherCode, _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
+  }
 }
 
 void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
@@ -56,6 +59,11 @@ void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut->copyAfterSwap = true;  // gif library depends on data from previous buffer
   videoOut->fillScreen(_bgColor);
   videoOut->waitForFrame();
+
+  if (!FILESYSTEM.begin()) {
+    log_d("SPIFFS Mount Failed");
+    return;
+  }
 
   sendMessage(MESSAGE::MSG_CHECK_DATA);
 }
@@ -111,7 +119,7 @@ void Display::update() {
   }
 
   switch (_message) {
-    case MESSAGE::MSG_OPEN_GIFFILE:
+    case MESSAGE::MSG_DISPLAY_FORCAST:
       displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
@@ -130,19 +138,11 @@ void Display::update() {
 }
 
 void Display::displayIcon(void) {
-  log_i("weather code = %d", weatherCodes);
-  JsonArray root = _doc[String(weatherCodes).c_str()];
-
-  const char *filename = root[0];  // "100.svg"
-  // const char *root_100_1 = root_100[1];  // "500.svg"
-  // const char *root_100_2 = root_100[2];  // "100"
-  // const char *root_100_3 = root_100[3];  // "晴"
-  // const char *root_100_4 = root_100[4];  // "CLEAR"
-
-  log_d("GIF file Name = %s", filename);
-
-  if (gif.open(filename, _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+  if (gif.open(_filename.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+    log_d("success to open %s", _filename.c_str());
     gif.playFrame(true, NULL);
+  } else {
+    log_e("failure to open %s", _filename.c_str());
   }
 
   gif.close();

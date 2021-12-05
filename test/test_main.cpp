@@ -98,25 +98,25 @@ void parse_weathercode(void) {
     JsonArray root = _doc[(const char*)code.c_str()];
 
     if (root.isNull() == false) {
-      log_printf("%d, ", i);                   // weather code
-      log_printf("MSG_WEATHER_CODE_%d, ", i);  // weather code
+      // log_printf("%d, ", i);                   // weather code
+      // log_printf("MSG_WEATHER_CODE_%d, ", i);  // weather code
 
-      const char* root_0 = root[0];  // "100.svg"
-      log_printf("%s, ", root_0);
-      const char* root_1 = root[1];  // "500.svg"
-      log_printf("%s, ", root_1);
-      const char* root_2 = root[2];  // "100"
-      log_printf("%s, ", root_2);
-      const char* root_3 = root[3];  // "晴"
-      log_printf("%s, ", root_3);
-      const char* root_4 = root[4];  // "CLEAR"
-      log_printf("%s\n", root_4);
+      // const char* root_0 = root[0];  // "100.svg"
+      // log_printf("%s, ", root_0);
+      // const char* root_1 = root[1];  // "500.svg"
+      // log_printf("%s, ", root_1);
+      // const char* root_2 = root[2];  // "100"
+      // log_printf("%s, ", root_2);
+      // const char* root_3 = root[3];  // "晴"
+      // log_printf("%s, ", root_3);
+      // const char* root_4 = root[4];  // "CLEAR"
+      // log_printf("%s\n", root_4);
 
       _disp.setWeatherCode(i);
       _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
       _disp.update();
 
-      delay(3000);
+      delay(10);
     }
   }
 }
@@ -145,8 +145,6 @@ void setup() {
   _wifi.start(nullptr);
   delay(5000);
 #endif
-
-  RUN_TEST(parse_weathercode);
 
 #if 0
   _weather.setAreaCode(27000);
@@ -178,6 +176,8 @@ void setup() {
 
   RUN_TEST(font_test3);
   delay(3000);
+
+  RUN_TEST(parse_weathercode);
 
   endtest();
 #endif

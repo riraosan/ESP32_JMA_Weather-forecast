@@ -62,6 +62,8 @@ class Display {
   String   _forcast_en;
 
   StaticJsonDocument<25000> _doc;
+  // Free Heap : 100096
+  // Free Heap : 74672
 
   static File _file;
 };
