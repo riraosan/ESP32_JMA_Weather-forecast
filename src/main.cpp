@@ -1,9 +1,9 @@
 /**
  *
- *  @file   WeatherDisplay.h
- *  @author fiatpanda750@gmail.com
+ *  @file       WeatherDisplay.h
+ *  @author     @riraosan
  *  @version    0.0.1
- *  @date   2021-11-30
+ *  @date       2021-11-30
  *  @copyright  MIT license.
  */
 

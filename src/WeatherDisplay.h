@@ -1,9 +1,9 @@
 /**
  *
- *  @file   WeatherDisplay.h
- *  @author @riraosan
+ *  @file       WeatherDisplay.h
+ *  @author     @riraosan
  *  @version    0.0.1
- *  @date   2021-11-20
+ *  @date       2021-11-20
  *  @copyright  MIT license.
  */
 
