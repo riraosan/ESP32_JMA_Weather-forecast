@@ -1,6 +1,5 @@
 #include <Weather.h>
 #include <esp32-hal-log.h>
-#include <filter.h>
 
 Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__WEATHER_CODE__0.json") {
   deserializeJson(_filter, filter);

@@ -35,5 +35,5 @@ class Weather {
   HTTPClient _httpClient;
 
   StaticJsonDocument<400>  _filter;
-  StaticJsonDocument<2500> _doc;
+  StaticJsonDocument<3000> _doc;
 };

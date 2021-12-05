@@ -1,7 +1,9 @@
+
 #pragma once
 
 #include <Arduino.h>
 #include <codes.h>
+#include <filter.h>
 
 // http://linkdata.org/api/1/rdf1s911i/JapaneseLocalGovermentCodeTable_rdf.json
 #define LOCAL_GOV_CODE 27000  // Osaka
