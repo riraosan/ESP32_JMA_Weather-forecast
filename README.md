@@ -1,5 +1,5 @@
 
-# ESP32_WeatherDisplay Sample
+# ESP32_JMA_Forecast Sample
 
 ## 💗 Acknowledgments
 
