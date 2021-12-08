@@ -1,6 +1,7 @@
 
 #include <Display.h>
 #include <esp32-hal-log.h>
+#include <codes.h>
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
@@ -23,7 +24,7 @@ Display::Display() : _temperature(0.0),
                      _bgPressure(_bgColor),
                      _bgHumidity(_bgColor),
                      _filename("") {
-  deserializeJson(_doc, weatherCodes);
+  deserializeJson(_doc, _weatherCodes);
 }
 
 void Display::setTextOffset(int16_t x, int16_t y) {
@@ -61,7 +62,7 @@ void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut->waitForFrame();
 
   if (!FILESYSTEM.begin()) {
-    log_d("SPIFFS Mount Failed");
+    log_e("SPIFFS Mount Failed");
     return;
   }
 

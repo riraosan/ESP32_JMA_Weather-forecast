@@ -21,7 +21,7 @@
 // /413.gif
 // /414.gif
 
-const char PROGMEM weatherCodes[] = R"(
+char _weatherCodes[] = R"(
 {
   "100": [
     "100.gif",

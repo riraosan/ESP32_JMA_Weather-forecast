@@ -85,7 +85,7 @@ void starttest(void) {
 }
 
 void parse_weathercode(void) {
-  DeserializationError error = deserializeJson(_doc, weatherCodes);
+  DeserializationError error = deserializeJson(_doc, _weatherCodes);
 
   if (error) {
     log_e("deserializeJson() failed: ");

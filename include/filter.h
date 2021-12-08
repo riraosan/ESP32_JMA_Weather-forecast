@@ -1,7 +1,7 @@
 
 #pragma once
 // R = Raw String Literals(C++)
-const char PROGMEM filter[] = R"(
+char filter[] = R"(
 [
   {
     "publishingOffice": true,
