@@ -43,8 +43,8 @@ class WeatherDisplay {
     sendMessage(MESSAGE::MSG_CHECK_DATA);
   }
 
-  static void forcastCallback(void) {
-    sendMessage(MESSAGE::MSG_CHECK_FORCAST);
+  static void forecastCallback(void) {
+    sendMessage(MESSAGE::MSG_CHECK_FORECAST);
   }
 
   void beginNtpClock(void) {
@@ -75,16 +75,16 @@ class WeatherDisplay {
     }
   }
 
-  void setWeatherForcast(void) {
+  void setWeatherForecast(void) {
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
     String result(_weather.getForecast());
 
     if (result.isEmpty()) {
-      String forcastcode(_weather.getTodayForcast());
-      log_i("Success to get Forcast code: %s", forcastcode.c_str());
+      String forecastcode(_weather.getTodayForecast());
+      log_i("Success to get Forecast code: %s", forecastcode.c_str());
 
-      _composite.setWeatherCode(forcastcode.toInt());
-      _composite.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
+      _composite.setWeatherCode(forecastcode.toInt());
+      _composite.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
     }
   }
 
@@ -118,10 +118,10 @@ class WeatherDisplay {
 
 #if defined(TEST_PERIOD)
     _serverChecker.attach(20, dataCallback);
-    _forcastChecker.attach(30, forcastCallback);
+    _forecastChecker.attach(30, forecastCallback);
 #else
     _serverChecker.attach(60 * 10, dataCallback);
-    _forcastChecker.attach(60 * 60, forcastCallback);
+    _forecastChecker.attach(60 * 60, forecastCallback);
 #endif
 
     _reboot.attach(60 * 60 * 12, restart);
@@ -144,7 +144,7 @@ class WeatherDisplay {
 
         setInformation();
 
-        sendMessage(MESSAGE::MSG_CHECK_FORCAST);
+        sendMessage(MESSAGE::MSG_CHECK_FORECAST);
         break;
       case MESSAGE::MSG_CHECK_DATA:
 
@@ -152,9 +152,9 @@ class WeatherDisplay {
 
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
-      case MESSAGE::MSG_CHECK_FORCAST:
+      case MESSAGE::MSG_CHECK_FORECAST:
 
-        setWeatherForcast();
+        setWeatherForecast();
 
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
@@ -168,7 +168,7 @@ class WeatherDisplay {
   WiFiClient _wifiClient;
   Ticker     _serverChecker;
   Ticker     _ntpclocker;
-  Ticker     _forcastChecker;
+  Ticker     _forecastChecker;
   Ticker     _reboot;
 
   Connect _wifi;

@@ -9,11 +9,13 @@ class Weather {
  public:
   Weather();
 
-  void   begin(WiFiClient &client);
+  void   begin(WiFiClient& client);
   void   setAreaCode(uint16_t localGovernmentCode);
   String getForecast(void);
-  String getTodayForcast(void);
-  String getNextdayForcast(void);
+  String getTodayForecast(void);
+  String getNextdayForecast(void);
+  String getForecastJp(void);
+  String getForecastEn(void);
   void   update();
 
  private:
@@ -26,14 +28,19 @@ class Weather {
 
   String _areaName;
   String _areaCode;
-  String _todayForcast;
-  String _nextdayForcast;
+  String _todayForecast;
+  String _nextdayForecast;
   String _weathers0;
   String _weathers1;
+  String _forecastJP;
+  String _forecastEN;
 
   WiFiClient _wifiClient;
   HTTPClient _httpClient;
 
-  StaticJsonDocument<400>  _filter;
-  StaticJsonDocument<3000> _doc;
+  StaticJsonDocument<3000> _codeDoc;
+  StaticJsonDocument<400>  _codeFilter;
+
+  StaticJsonDocument<255> _forecastDoc;
+  StaticJsonDocument<100> _forecastFilter;
 };

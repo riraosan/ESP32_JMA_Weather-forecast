@@ -3,7 +3,7 @@
 #include <filter.h>
 
 Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__WEATHER_CODE__0.json") {
-  deserializeJson(_filter, filter);
+  deserializeJson(_codeFilter, codeFilter);
 }
 
 void Weather::begin(WiFiClient& client) {
@@ -34,10 +34,10 @@ String Weather::getForecast(void) {
 
       // log_i("Response\n%s", _response.c_str());
 
-      DeserializationError error = deserializeJson(_doc,
+      DeserializationError error = deserializeJson(_codeDoc,
                                                    _response.c_str(),
                                                    _response.length(),
-                                                   DeserializationOption::Filter(_filter));
+                                                   DeserializationOption::Filter(_codeFilter));
 
       if (error) {
         log_e("deserializeJson() failed: %s", error.f_str());
@@ -45,34 +45,39 @@ String Weather::getForecast(void) {
         return error.f_str();
       }
 
-      JsonObject  root_0           = _doc[0];
-      const char* publishingOffice = root_0["publishingOffice"];
-      const char* reportDatetime   = root_0["reportDatetime"];
+      JsonObject root_0 = _codeDoc[0];
+      if (!root_0.isNull()) {
+        const char* publishingOffice = root_0["publishingOffice"];
+        const char* reportDatetime   = root_0["reportDatetime"];
 
-      log_i("publishingOffice  %s", publishingOffice);
-      log_i("  reportDatetime  %s", reportDatetime);
+        log_i("publishingOffice  %s", publishingOffice);
+        log_i("  reportDatetime  %s", reportDatetime);
 
-      JsonArray   root_0_timeSeries = root_0["timeSeries"];
-      const char* area_name         = root_0_timeSeries[0]["areas"][0]["area"]["name"];
-      const char* area_code         = root_0_timeSeries[0]["areas"][0]["area"]["code"];
+        JsonArray root_0_timeSeries = root_0["timeSeries"];
 
-      JsonArray weatherCodes = root_0_timeSeries[0]["areas"][0]["weatherCodes"];
-      JsonArray weathers     = root_0_timeSeries[0]["areas"][0]["weathers"];
+        if (!root_0_timeSeries.isNull()) {
+          const char* area_name = root_0_timeSeries[0]["areas"][0]["area"]["name"];
+          const char* area_code = root_0_timeSeries[0]["areas"][0]["area"]["code"];
 
-      if (root_0_timeSeries[0] != nullptr) {
-        _areaName       = (const char*)area_name;
-        _areaCode       = (const char*)area_code;
-        _todayForcast   = (const char*)weatherCodes[0];
-        _nextdayForcast = (const char*)weatherCodes[1];
-        _weathers0      = (const char*)weathers[0];
-        _weathers1      = (const char*)weathers[1];
+          JsonArray weatherCodes = root_0_timeSeries[0]["areas"][0]["weatherCodes"];
+          JsonArray weathers     = root_0_timeSeries[0]["areas"][0]["weathers"];
 
-        log_i("       area_name  %s", _areaName.c_str());
-        log_i("       area_code  %s", _areaCode.c_str());
-        log_i(" weatherCodes[0]  %s", _todayForcast.c_str());
-        log_i(" weatherCodes[1]  %s", _nextdayForcast.c_str());
-        log_i("     weathers[0]  %s", _weathers0.c_str());
-        log_i("     weathers[1]  %s", _weathers1.c_str());
+          if (!weatherCodes.isNull() && !weathers.isNull()) {
+            _areaName        = (const char*)area_name;
+            _areaCode        = (const char*)area_code;
+            _todayForecast   = (const char*)weatherCodes[0];
+            _nextdayForecast = (const char*)weatherCodes[1];
+            _weathers0       = (const char*)weathers[0];
+            _weathers1       = (const char*)weathers[1];
+
+            log_i("       area_name  %s", _areaName.c_str());
+            log_i("       area_code  %s", _areaCode.c_str());
+            log_i(" weatherCodes[0]  %s", _todayForecast.c_str());
+            log_i(" weatherCodes[1]  %s", _nextdayForecast.c_str());
+            log_i("     weathers[0]  %s", _weathers0.c_str());
+            log_i("     weathers[1]  %s", _weathers1.c_str());
+          }
+        }
       }
 
       _httpClient.end();
@@ -88,12 +93,12 @@ String Weather::getForecast(void) {
   return error;
 }
 
-String Weather::getTodayForcast(void) {
-  return _todayForcast;
+String Weather::getTodayForecast(void) {
+  return _todayForecast;
 }
 
-String Weather::getNextdayForcast(void) {
-  return _nextdayForcast;
+String Weather::getNextdayForecast(void) {
+  return _nextdayForecast;
 }
 
 String Weather::_createURL(uint16_t localGovernmentCode) {

@@ -17,26 +17,27 @@ Display    _disp;
 WiFiClient _client;
 Weather    _weather;
 
-constexpr uint16_t CODES_JSON_SIZE = 25000;
+StaticJsonDocument<255> _forecast;
+StaticJsonDocument<100> filter;
 
 void setUp(void) {}
 
 void tearDown(void) {}
 
 void weather_test_004(void) {
-  String forcast(_weather.getForecast());
-  Serial.printf("%s\n", forcast.c_str());
+  String forecast(_weather.getForecast());
+  Serial.printf("%s\n", forecast.c_str());
   log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
 
 void weather_test_005(void) {
-  String today(_weather.getTodayForcast());
+  String today(_weather.getTodayForecast());
   Serial.printf("today:%s\n", today.c_str());
   log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
 
 void weather_test_006(void) {
-  String nextday(_weather.getNextdayForcast());
+  String nextday(_weather.getNextdayForecast());
   Serial.printf("nextday:%s\n", nextday.c_str());
   log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
@@ -90,7 +91,7 @@ void starttest(void) {
 void parse_weathercode(void) {
   for (int i = 100; i < 451; i++) {
     _disp.setWeatherCode(i);
-    _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
+    _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
     _disp.update();
 
     delay(10);
@@ -106,43 +107,81 @@ void endtest(void) {
   _disp.update();
 }
 
-constexpr char filter[] PROGMEM = R"({"100": [true]})";
+void getForecastString_100(void) {
+  String   _forecastFilter(R"({"__CODE__": [true]})");
+  uint16_t code = 100;
 
-StaticJsonDocument<255> doc;
-StaticJsonDocument<100> _filter;
+  _forecastFilter.replace("__CODE__", String(code));
 
-void getWeatherCodesSpiffs(void) {
-  if (!FILESYSTEM.begin()) {
-    TEST_FAIL();
-  }
+  deserializeJson(filter, _forecastFilter);
 
-  File file = SPIFFS.open("/codes.json");
+  File file = FILESYSTEM.open("/codes.json");
   TEST_ASSERT(file.size() > 0);
 
   if (file) {
-    deserializeJson(_filter, filter);
-
-    DeserializationError error = deserializeJson(doc,
+    DeserializationError error = deserializeJson(_forecast,
                                                  file,
-                                                 DeserializationOption::Filter(_filter));
+                                                 DeserializationOption::Filter(filter));
     if (error) {
       log_e("Failed to read file, using default configuration");
       TEST_FAIL();
       return;
     }
 
-    JsonArray root = doc["100"];
+    JsonArray root = _forecast[String(code).c_str()];
 
     if (root.isNull() == false) {
       String _filename(String("/") + String((const char *)root[0]));  // "100.gif"
-      String _forcast_jp((const char *)root[3]);                      // "晴"
-      String _forcast_en((const char *)root[4]);                      // "CLEAR"
+      String _forecast_jp((const char *)root[3]);                     // "晴"
+      String _forecast_en((const char *)root[4]);                     // "CLEAR"
 
       TEST_ASSERT_EQUAL_STRING("/100.gif", _filename.c_str());
-      TEST_ASSERT_EQUAL_STRING("晴", _forcast_jp.c_str());
-      TEST_ASSERT_EQUAL_STRING("CLEAR", _forcast_en.c_str());
+      TEST_ASSERT_EQUAL_STRING("晴", _forecast_jp.c_str());
+      TEST_ASSERT_EQUAL_STRING("CLEAR", _forecast_en.c_str());
 
-      log_i("%s, %s, %s", _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
+      log_i("%s_%s_%s", _filename.c_str(), _forecast_jp.c_str(), _forecast_en.c_str());
+    } else {
+      TEST_FAIL();
+    }
+  }
+
+  file.close();
+}
+void getForecastString_450(void) {
+  String   _forecastFilter(R"({"__CODE__": [true]})");
+  uint16_t code = 450;
+
+  _forecastFilter.replace("__CODE__", String(code));
+
+  deserializeJson(filter, _forecastFilter);
+
+  File file = FILESYSTEM.open("/codes.json");
+  TEST_ASSERT(file.size() > 0);
+
+  if (file) {
+    DeserializationError error = deserializeJson(_forecast,
+                                                 file,
+                                                 DeserializationOption::Filter(filter));
+    if (error) {
+      log_e("Failed to read file, using default configuration");
+      TEST_FAIL();
+      return;
+    }
+
+    JsonArray root = _forecast[String(code).c_str()];
+
+    if (root.isNull() == false) {
+      String _filename(String("/") + String((const char *)root[0]));
+      String _forecast_jp((const char *)root[3]);
+      String _forecast_en((const char *)root[4]);
+
+      TEST_ASSERT_EQUAL_STRING("/400.gif", _filename.c_str());
+      TEST_ASSERT_EQUAL_STRING("雪で雷を伴う", _forecast_jp.c_str());
+      TEST_ASSERT_EQUAL_STRING("SNOW AND THUNDER", _forecast_en.c_str());
+
+      log_i("%s_%s_%s", _filename.c_str(), _forecast_jp.c_str(), _forecast_en.c_str());
+    } else {
+      TEST_FAIL();
     }
   }
 
@@ -155,7 +194,14 @@ void setup() {
 
   UNITY_BEGIN();  // IMPORTANT LINE!
 
-  RUN_TEST(getWeatherCodesSpiffs);
+#if 1
+  if (!FILESYSTEM.begin()) {
+    TEST_FAIL();
+  }
+
+  RUN_TEST(getForecastString_100);
+  RUN_TEST(getForecastString_450);
+#endif
 
 #if 0
   _wifi.setTaskName("AutoConnect");

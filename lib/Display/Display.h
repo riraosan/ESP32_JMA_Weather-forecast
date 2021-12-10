@@ -58,8 +58,8 @@ class Display {
   // weatherCodes
   uint32_t _code;
   String   _filename;
-  String   _forcast_jp;
-  String   _forcast_en;
+  String   _forecast_jp;
+  String   _forecast_en;
 
   static StaticJsonDocument<25000> _doc;
   //   Free Heap : 100096

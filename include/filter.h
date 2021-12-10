@@ -1,7 +1,7 @@
 
 #pragma once
-// R = Raw String Literals(C++)
-constexpr char filter[] PROGMEM = R"(
+// R"()" = Raw String Literals(C++)
+constexpr char codeFilter[] PROGMEM = R"(
 [
   {
     "publishingOffice": true,

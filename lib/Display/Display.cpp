@@ -119,7 +119,7 @@ void Display::update() {
   }
 
   switch (_message) {
-    case MESSAGE::MSG_DISPLAY_FORCAST:
+    case MESSAGE::MSG_DISPLAY_FORECAST:
       displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
