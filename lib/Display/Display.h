@@ -6,7 +6,6 @@
 #include <SPIFFS.h>
 #include <AnimatedGIF.h>
 #include <ESP_8_BIT_GFX.h>
-//#include <StreamUtils.h>
 #include <ArduinoJson.h>
 #include <WeatherCode.h>
 
@@ -57,14 +56,14 @@ class Display {
   uint16_t _bgHumidity;
 
   // weatherCodes
-  uint32_t _weatherCode;
+  uint32_t _code;
   String   _filename;
   String   _forcast_jp;
   String   _forcast_en;
 
-  StaticJsonDocument<25000> _doc;
-  //  Free Heap : 100096
-  //  Free Heap :  74672
+  static StaticJsonDocument<25000> _doc;
+  //   Free Heap : 100096
+  //   Free Heap :  74672
 
   static File _file;
 };

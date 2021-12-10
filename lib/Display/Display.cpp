@@ -1,7 +1,6 @@
 
 #include <Display.h>
 #include <esp32-hal-log.h>
-#include <codes.h>
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
@@ -24,7 +23,7 @@ Display::Display() : _temperature(0.0),
                      _bgPressure(_bgColor),
                      _bgHumidity(_bgColor),
                      _filename("") {
-  deserializeJson(_doc, _weatherCodes);
+  // deserializeJson(_doc, _weatherCodes);
 }
 
 void Display::setTextOffset(int16_t x, int16_t y) {
@@ -41,16 +40,16 @@ void Display::setNtpTime(String ntpTime) {
 }
 
 void Display::setWeatherCode(uint32_t weatherCode) {
-  _weatherCode   = weatherCode;
-  JsonArray root = _doc[(const char *)String(_weatherCode).c_str()];
+  _code = weatherCode;
+  // JsonArray root = _doc[(const char *)String(_code).c_str()];
 
-  if (root.isNull() == false) {
-    _filename   = String("/") + String((const char *)root[0]);  // "100.gif"
-    _forcast_jp = (const char *)root[3];                        // "晴"
-    _forcast_en = (const char *)root[4];                        // "CLEAR"
+  // if (root.isNull() == false) {
+  //   _filename   = String("/") + String((const char *)root[0]);  // "100.gif"
+  //   _forcast_jp = (const char *)root[3];                        // "晴"
+  //   _forcast_en = (const char *)root[4];                        // "CLEAR"
 
-    log_i("weather code = %d, %s, %s, %s", _weatherCode, _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
-  }
+  //   log_i("weather code = %d, %s, %s, %s", _code, _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
+  // }
 }
 
 void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {

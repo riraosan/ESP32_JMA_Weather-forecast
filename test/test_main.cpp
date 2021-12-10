@@ -8,7 +8,7 @@
 #include <Display.h>
 #include <Weather.h>
 #include <Connect.h>
-#include <codes.h>
+#include <StreamUtils.h>
 #include <ArduinoJson.h>
 #include <esp32-hal-log.h>
 
@@ -17,7 +17,7 @@ Display    _disp;
 WiFiClient _client;
 Weather    _weather;
 
-StaticJsonDocument<25000> _doc;
+constexpr uint16_t CODES_JSON_SIZE = 25000;
 
 void setUp(void) {}
 
@@ -26,16 +26,19 @@ void tearDown(void) {}
 void weather_test_004(void) {
   String forcast(_weather.getForecast());
   Serial.printf("%s\n", forcast.c_str());
+  log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
 
 void weather_test_005(void) {
   String today(_weather.getTodayForcast());
   Serial.printf("today:%s\n", today.c_str());
+  log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
 
 void weather_test_006(void) {
   String nextday(_weather.getNextdayForcast());
   Serial.printf("nextday:%s\n", nextday.c_str());
+  log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
 
 void font_test1(void) {
@@ -85,39 +88,12 @@ void starttest(void) {
 }
 
 void parse_weathercode(void) {
-  DeserializationError error = deserializeJson(_doc, _weatherCodes);
-
-  if (error) {
-    log_e("deserializeJson() failed: ");
-    log_e("%s", error.c_str());
-    return;
-  }
-
   for (int i = 100; i < 451; i++) {
-    String    code(i);
-    JsonArray root = _doc[(const char*)code.c_str()];
+    _disp.setWeatherCode(i);
+    _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
+    _disp.update();
 
-    if (root.isNull() == false) {
-      // log_printf("%d, ", i);                   // weather code
-      // log_printf("MSG_WEATHER_CODE_%d, ", i);  // weather code
-
-      // const char* root_0 = root[0];  // "100.svg"
-      // log_printf("%s, ", root_0);
-      // const char* root_1 = root[1];  // "500.svg"
-      // log_printf("%s, ", root_1);
-      // const char* root_2 = root[2];  // "100"
-      // log_printf("%s, ", root_2);
-      // const char* root_3 = root[3];  // "晴"
-      // log_printf("%s, ", root_3);
-      // const char* root_4 = root[4];  // "CLEAR"
-      // log_printf("%s\n", root_4);
-
-      _disp.setWeatherCode(i);
-      _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORCAST);
-      _disp.update();
-
-      delay(10);
-    }
+    delay(10);
   }
 }
 
@@ -130,11 +106,56 @@ void endtest(void) {
   _disp.update();
 }
 
+constexpr char filter[] PROGMEM = R"({"100": [true]})";
+
+StaticJsonDocument<255> doc;
+StaticJsonDocument<100> _filter;
+
+void getWeatherCodesSpiffs(void) {
+  if (!FILESYSTEM.begin()) {
+    TEST_FAIL();
+  }
+
+  File file = SPIFFS.open("/codes.json");
+  TEST_ASSERT(file.size() > 0);
+
+  if (file) {
+    deserializeJson(_filter, filter);
+
+    DeserializationError error = deserializeJson(doc,
+                                                 file,
+                                                 DeserializationOption::Filter(_filter));
+    if (error) {
+      log_e("Failed to read file, using default configuration");
+      TEST_FAIL();
+      return;
+    }
+
+    JsonArray root = doc["100"];
+
+    if (root.isNull() == false) {
+      String _filename(String("/") + String((const char *)root[0]));  // "100.gif"
+      String _forcast_jp((const char *)root[3]);                      // "晴"
+      String _forcast_en((const char *)root[4]);                      // "CLEAR"
+
+      TEST_ASSERT_EQUAL_STRING("/100.gif", _filename.c_str());
+      TEST_ASSERT_EQUAL_STRING("晴", _forcast_jp.c_str());
+      TEST_ASSERT_EQUAL_STRING("CLEAR", _forcast_en.c_str());
+
+      log_i("%s, %s, %s", _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
+    }
+  }
+
+  file.close();
+}
+
 void setup() {
   // NOTE!!! Wait for >2 secs
   delay(2000);
 
   UNITY_BEGIN();  // IMPORTANT LINE!
+
+  RUN_TEST(getWeatherCodesSpiffs);
 
 #if 0
   _wifi.setTaskName("AutoConnect");
@@ -144,9 +165,7 @@ void setup() {
   _wifi.begin(SECRET_SSID, SECRET_PASS);
   _wifi.start(nullptr);
   delay(5000);
-#endif
 
-#if 0
   _weather.setAreaCode(27000);
   _weather.begin(_client);
   delay(3000);
@@ -161,10 +180,9 @@ void setup() {
   delay(3000);
 #endif
 
-#if 1
+#if 0
   _disp.begin(12, true, 16);
   _disp.sendMessage(MESSAGE::MSG_NOTHING);
-
   starttest();
   delay(3000);
 
@@ -177,15 +195,16 @@ void setup() {
   RUN_TEST(font_test3);
   delay(3000);
 
+  log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   RUN_TEST(parse_weathercode);
+  log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
   endtest();
 #endif
-
   UNITY_END();  // stop unit testing
 }
 
 void loop() {
-  _disp.update();
+  //_disp.update();
   delay(1);
 }

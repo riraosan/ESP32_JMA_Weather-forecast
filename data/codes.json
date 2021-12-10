@@ -1,27 +1,3 @@
-
-#pragma once
-
-// /102.gif
-// /104.gif
-// /112.gif
-// /115.gif
-// /204.gif
-// /215.gif
-// /301.gif
-// /303.gif
-// /308.gif
-// /314.gif
-// /311.gif
-// /400.gif
-// /401.gif
-// /402.gif
-// /403.gif
-// /406.gif
-// /411.gif
-// /413.gif
-// /414.gif
-
-char _weatherCodes[] = R"(
 {
   "100": [
     "100.gif",
@@ -849,4 +825,4 @@ char _weatherCodes[] = R"(
     "雪で雷を伴う",
     "SNOW AND THUNDER"
   ]
-})";
+}
