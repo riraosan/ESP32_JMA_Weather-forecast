@@ -39,17 +39,10 @@ void Display::setNtpTime(String ntpTime) {
   _ntpTime = ntpTime;
 }
 
-void Display::setWeatherCode(uint32_t weatherCode) {
-  _code = weatherCode;
-  // JsonArray root = _doc[(const char *)String(_code).c_str()];
-
-  // if (root.isNull() == false) {
-  //   _filename   = String("/") + String((const char *)root[0]);  // "100.gif"
-  //   _forcast_jp = (const char *)root[3];                        // "晴"
-  //   _forcast_en = (const char *)root[4];                        // "CLEAR"
-
-  //   log_i("weather code = %d, %s, %s, %s", _code, _filename.c_str(), _forcast_jp.c_str(), _forcast_en.c_str());
-  // }
+void Display::setWeatherForecast(uint16_t weatherCode, String forecastJP, String forecastEN) {
+  _code       = weatherCode;
+  _forecastJP = forecastJP;
+  _forecastEN = forecastEN;
 }
 
 void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
@@ -61,7 +54,7 @@ void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut->waitForFrame();
 
   if (!FILESYSTEM.begin()) {
-    log_e("SPIFFS Mount Failed");
+    log_e("FILESYSTEM Mount Failed");
     return;
   }
 
@@ -75,8 +68,6 @@ void Display::setWeatherInfo(float temperature, float humidity, float pressure, 
 }
 
 void Display::displayWeatherInfo(void) {
-  // log_i("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
-
   // Title
   videoOut->setTextColor(0xFFFF, _bgColor);
   videoOut->printEfont(" Osaka Weather Station        ", _textOffset_x, _textOffset_y + 16 * 0, 1);
@@ -88,6 +79,9 @@ void Display::displayWeatherInfo(void) {
   sprintf(tempe, "%2.1f", _temperature);
   sprintf(humid, " %2.0f", _humidity);
   sprintf(press, " %4.1f", _pressure);
+
+  // TODO 天気予報（日本語）ここからはじめてね。
+  // TODO 天気予報（英語）
 
   // 気温
   videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 12);
@@ -107,6 +101,8 @@ void Display::displayWeatherInfo(void) {
   videoOut->setTextSize(1);
   videoOut->printEfont(press);
   videoOut->printEfont("hPa");
+
+  // log_i("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
 }
 
 void Display::update() {

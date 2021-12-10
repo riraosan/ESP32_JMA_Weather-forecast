@@ -81,7 +81,7 @@ String Weather::getForecast(void) {
       }
 
       _httpClient.end();
-      return "";
+      return "success";
     }
   }
 
@@ -99,6 +99,13 @@ String Weather::getTodayForecast(void) {
 
 String Weather::getNextdayForecast(void) {
   return _nextdayForecast;
+}
+String Weather::getForecastJp(void) {
+  return _forecastJP;
+}
+
+String Weather::getForecastEn(void) {
+  return _forecastEN;
 }
 
 String Weather::_createURL(uint16_t localGovernmentCode) {

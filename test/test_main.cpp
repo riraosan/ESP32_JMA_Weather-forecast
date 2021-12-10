@@ -90,7 +90,8 @@ void starttest(void) {
 
 void parse_weathercode(void) {
   for (int i = 100; i < 451; i++) {
-    _disp.setWeatherCode(i);
+    // TODO codeを入力、コードに紐付けられた予報文言を取得
+    // TODO 予報文言をDisplayへ設定する
     _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
     _disp.update();
 
@@ -130,7 +131,7 @@ void getForecastString_100(void) {
 
     JsonArray root = _forecast[String(code).c_str()];
 
-    if (root.isNull() == false) {
+    if (!root.isNull()) {
       String _filename(String("/") + String((const char *)root[0]));  // "100.gif"
       String _forecast_jp((const char *)root[3]);                     // "晴"
       String _forecast_en((const char *)root[4]);                     // "CLEAR"
@@ -170,7 +171,7 @@ void getForecastString_450(void) {
 
     JsonArray root = _forecast[String(code).c_str()];
 
-    if (root.isNull() == false) {
+    if (!root.isNull()) {
       String _filename(String("/") + String((const char *)root[0]));
       String _forecast_jp((const char *)root[3]);
       String _forecast_en((const char *)root[4]);

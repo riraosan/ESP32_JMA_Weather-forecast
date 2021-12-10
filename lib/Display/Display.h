@@ -20,7 +20,7 @@ class Display {
   void setNtpTime(String ntpTime);
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
   void displayWeatherInfo(void);
-  void setWeatherCode(uint32_t weatherCode);
+  void setWeatherForecast(uint16_t weatherCode, String forecastJP, String forecastEN);
   void displayIcon(void);
 
   static void sendMessage(MESSAGE message);
@@ -56,14 +56,10 @@ class Display {
   uint16_t _bgHumidity;
 
   // weatherCodes
-  uint32_t _code;
+  uint16_t _code;
   String   _filename;
-  String   _forecast_jp;
-  String   _forecast_en;
-
-  static StaticJsonDocument<25000> _doc;
-  //   Free Heap : 100096
-  //   Free Heap :  74672
+  String   _forecastJP;
+  String   _forecastEN;
 
   static File _file;
 };
