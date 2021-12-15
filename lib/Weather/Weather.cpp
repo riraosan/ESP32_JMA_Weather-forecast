@@ -1,3 +1,4 @@
+
 #include <Weather.h>
 #include <esp32-hal-log.h>
 #include <filter.h>
@@ -14,7 +15,7 @@ void Weather::setAreaCode(uint16_t localGovernmentCode) {
   _localGovernmentCode = localGovernmentCode;
 }
 
-String Weather::getForecast(void) {
+String Weather::getJMAForecast(void) {
   String url;
 
   if (_localGovernmentCode) {
@@ -93,19 +94,58 @@ String Weather::getForecast(void) {
   return error;
 }
 
+void Weather::getJMAWeathers(void) {
+  String forecastFilter(R"({"__CODE__": [true]})");
+  forecastFilter.replace("__CODE__", _todayForecast);
+
+  deserializeJson(_forecastFilter, forecastFilter);
+
+  File file = SPIFFS.open("/codes.json");
+
+  if (file) {
+    DeserializationError error = deserializeJson(_forecastDoc,
+                                                 file,
+                                                 DeserializationOption::Filter(_forecastFilter));
+    if (error) {
+      log_e("Failed to read codes.json.");
+      file.close();
+      return;
+    }
+
+    JsonArray root = _forecastDoc[_todayForecast.c_str()];
+
+    if (!root.isNull()) {
+      _iconFile   = String("/") + String((const char*)root[0]);  // "100.gif"
+      _forecastJP = (const char*)root[3];                        // "晴"
+      _forecastEN = (const char*)root[4];                        // "CLEAR"
+
+      log_i("%s_%s_%s", _iconFile.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
+    }
+  }
+
+  file.close();
+}
+
+// weather code
 String Weather::getTodayForecast(void) {
   return _todayForecast;
 }
 
+// weather code
 String Weather::getNextdayForecast(void) {
   return _nextdayForecast;
 }
-String Weather::getForecastJp(void) {
+
+String Weather::getWeathersJp(void) {
   return _forecastJP;
 }
 
-String Weather::getForecastEn(void) {
+String Weather::getWeathersEn(void) {
   return _forecastEN;
+}
+
+String Weather::getICONFilename(void) {
+  return _iconFile;
 }
 
 String Weather::_createURL(uint16_t localGovernmentCode) {

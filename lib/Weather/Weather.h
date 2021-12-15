@@ -1,5 +1,6 @@
 
 #include <Arduino.h>
+#include <SPIFFS.h>
 #include <HTTPClient.h>
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
@@ -11,11 +12,13 @@ class Weather {
 
   void   begin(WiFiClient& client);
   void   setAreaCode(uint16_t localGovernmentCode);
-  String getForecast(void);
+  String getJMAForecast(void);
+  void   getJMAWeathers(void);
   String getTodayForecast(void);
   String getNextdayForecast(void);
-  String getForecastJp(void);
-  String getForecastEn(void);
+  String getWeathersJp(void);
+  String getWeathersEn(void);
+  String getICONFilename(void);
   void   update();
 
  private:
@@ -34,6 +37,7 @@ class Weather {
   String _weathers1;
   String _forecastJP;
   String _forecastEN;
+  String _iconFile;
 
   WiFiClient _wifiClient;
   HTTPClient _httpClient;

@@ -25,7 +25,7 @@ void setUp(void) {}
 void tearDown(void) {}
 
 void weather_test_004(void) {
-  String forecast(_weather.getForecast());
+  String forecast(_weather.getJMAForecast());
   Serial.printf("%s\n", forecast.c_str());
   log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 }
@@ -116,7 +116,7 @@ void getForecastString_100(void) {
 
   deserializeJson(filter, _forecastFilter);
 
-  File file = FILESYSTEM.open("/codes.json");
+  File file = SPIFFS.open("/codes.json");
   TEST_ASSERT(file.size() > 0);
 
   if (file) {
@@ -148,6 +148,7 @@ void getForecastString_100(void) {
 
   file.close();
 }
+
 void getForecastString_450(void) {
   String   _forecastFilter(R"({"__CODE__": [true]})");
   uint16_t code = 450;
@@ -156,7 +157,7 @@ void getForecastString_450(void) {
 
   deserializeJson(filter, _forecastFilter);
 
-  File file = FILESYSTEM.open("/codes.json");
+  File file = SPIFFS.open("/codes.json");
   TEST_ASSERT(file.size() > 0);
 
   if (file) {
@@ -196,7 +197,7 @@ void setup() {
   UNITY_BEGIN();  // IMPORTANT LINE!
 
 #if 1
-  if (!FILESYSTEM.begin()) {
+  if (!SPIFFS.begin()) {
     TEST_FAIL();
   }
 

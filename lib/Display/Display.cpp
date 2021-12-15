@@ -39,8 +39,8 @@ void Display::setNtpTime(String ntpTime) {
   _ntpTime = ntpTime;
 }
 
-void Display::setWeatherForecast(uint16_t weatherCode, String forecastJP, String forecastEN) {
-  _code       = weatherCode;
+void Display::setWeatherForecast(String filename, String forecastJP, String forecastEN) {
+  _filename   = filename;
   _forecastJP = forecastJP;
   _forecastEN = forecastEN;
 }
@@ -53,7 +53,7 @@ void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut->fillScreen(_bgColor);
   videoOut->waitForFrame();
 
-  if (!FILESYSTEM.begin()) {
+  if (!SPIFFS.begin()) {
     log_e("FILESYSTEM Mount Failed");
     return;
   }
@@ -80,8 +80,15 @@ void Display::displayWeatherInfo(void) {
   sprintf(humid, " %2.0f", _humidity);
   sprintf(press, " %4.1f", _pressure);
 
-  // TODO 天気予報（日本語）ここからはじめてね。
-  // TODO 天気予報（英語）
+  videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 10);
+  videoOut->setTextColor(0xFFFF, _bgColor);
+  videoOut->setTextSize(1);
+  videoOut->printEfont(_forecastJP.c_str());
+
+  videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 11);
+  videoOut->setTextColor(0xFFFF, _bgColor);
+  videoOut->setTextSize(1);
+  videoOut->printEfont(_forecastEN.c_str());
 
   // 気温
   videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 12);
@@ -145,7 +152,7 @@ void Display::displayIcon(void) {
 }
 
 void *Display::_GIFOpenFile(const char *fname, int32_t *pSize) {
-  _file = FILESYSTEM.open(fname);
+  _file = SPIFFS.open(fname);
 
   if (_file) {
     *pSize = _file.size();

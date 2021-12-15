@@ -9,8 +9,6 @@
 #include <ArduinoJson.h>
 #include <WeatherCode.h>
 
-#define FILESYSTEM SPIFFS
-
 class Display {
  public:
   Display(void);
@@ -20,7 +18,7 @@ class Display {
   void setNtpTime(String ntpTime);
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
   void displayWeatherInfo(void);
-  void setWeatherForecast(uint16_t weatherCode, String forecastJP, String forecastEN);
+  void setWeatherForecast(String filename, String forecastJP, String forecastEN);
   void displayIcon(void);
 
   static void sendMessage(MESSAGE message);
@@ -56,7 +54,6 @@ class Display {
   uint16_t _bgHumidity;
 
   // weatherCodes
-  uint16_t _code;
   String   _filename;
   String   _forecastJP;
   String   _forecastEN;

@@ -79,13 +79,12 @@ class WeatherDisplay {
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
     String result();
 
-    if (_weather.getForecast() == "success") {
-      String forecastcode(_weather.getTodayForecast());
-      String forecastJP(_weather.getForecastJp());
-      String forecastEN(_weather.getForecastEn());
-      log_i("Success to get Forecast code: %s", forecastcode.c_str());
+    if (_weather.getJMAForecast() == "success") {
+      log_i("Success to get Forecast code");
 
-      _composite.setWeatherForecast(forecastcode.toInt(), forecastJP, forecastEN);
+      _weather.getJMAWeathers();
+
+      _composite.setWeatherForecast(_weather.getICONFilename(), _weather.getWeathersJp(), _weather.getWeathersEn());
       _composite.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
     }
   }
