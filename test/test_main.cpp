@@ -92,6 +92,7 @@ void parse_weathercode(void) {
   for (int i = 100; i < 451; i++) {
     // TODO codeを入力、コードに紐付けられた予報文言を取得
     // TODO 予報文言をDisplayへ設定する
+    _disp.setWeatherForecast("100.gif", "", "");
     _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
     _disp.update();
 
