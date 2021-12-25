@@ -119,7 +119,7 @@ void Weather::getJMAWeathers(void) {
       _forecastJP = (const char*)root[3];                        // "晴"
       _forecastEN = (const char*)root[4];                        // "CLEAR"
 
-      log_i("%s_%s_%s", _iconFile.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
+      log_d("%s_%s_%s", _iconFile.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
     }
   }
 

@@ -10,14 +10,14 @@
 #pragma once
 
 #include <Arduino.h>
-#include <secrets.h>
-#include <WeatherCode.h>
 #include <Connect.h>
 #include <Display.h>
-#include <Weather.h>
-#include <Ticker.h>
-#include <ThingSpeak.h>
 #include <HTTPClient.h>
+#include <ThingSpeak.h>
+#include <Ticker.h>
+#include <Weather.h>
+#include <WeatherCode.h>
+#include <secrets.h>
 
 class WeatherDisplay {
  public:
@@ -30,21 +30,12 @@ class WeatherDisplay {
     _message = message;
   }
 
-  static void restart(void) {
-    ESP.restart();
-    delay(1000);
-  }
-
   static void setNtpTime(void) {
     _clock = true;
   }
 
-  static void dataCallback(void) {
+  static void timerCallback(void) {
     sendMessage(MESSAGE::MSG_CHECK_DATA);
-  }
-
-  static void forecastCallback(void) {
-    sendMessage(MESSAGE::MSG_CHECK_FORECAST);
   }
 
   void beginNtpClock(void) {
@@ -96,6 +87,12 @@ class WeatherDisplay {
     if (getLocalTime(&info)) {
       sprintf(buffer, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
 
+      if (info.tm_hour == 23 && info.tm_min == 59) {
+        ESP.restart();
+        delay(1000);
+        return;
+      }
+
       _ntpTime = buffer;
 
       _composite.setNtpTime(_ntpTime);
@@ -109,7 +106,11 @@ class WeatherDisplay {
     _wifi.setTaskSize(4096 * 1);
     _wifi.setTaskPriority(2);
     _wifi.setCore(0);
+#if defined(TEST_PERIOD)
     _wifi.begin(SECRET_SSID, SECRET_PASS);
+#else
+    _wifi.begin();
+#endif
     _wifi.start(nullptr);
 
     ThingSpeak.begin(_wifiClient);
@@ -118,43 +119,26 @@ class WeatherDisplay {
     _weather.begin(_wifiClient);
 
 #if defined(TEST_PERIOD)
-    _serverChecker.attach(20, dataCallback);
-    _forecastChecker.attach(30, forecastCallback);
+    _serverChecker.attach(30, timerCallback);
 #else
-    _serverChecker.attach(60 * 10, dataCallback);
-    _forecastChecker.attach(60 * 60, forecastCallback);
+    _serverChecker.attach(60 * 15, timerCallback);  // every 15min
 #endif
 
-    _reboot.attach(60 * 60 * 12, restart);
     beginNtpClock();
 
     _composite.begin(12, true, 16);
-    sendMessage(MESSAGE::MSG_INIT_DATA);
+    sendMessage(MESSAGE::MSG_CHECK_DATA);
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   }
 
   void update(void) {
-    if (_clock) {
-      setNtpClock();
-    }
-
-    _composite.update();
-
     switch (_message) {
-      case MESSAGE::MSG_INIT_DATA:
-
+      case MESSAGE::MSG_CHECK_DATA:
         setInformation();
 
         sendMessage(MESSAGE::MSG_CHECK_FORECAST);
         break;
-      case MESSAGE::MSG_CHECK_DATA:
-
-        setInformation();
-
-        sendMessage(MESSAGE::MSG_NOTHING);
-        break;
       case MESSAGE::MSG_CHECK_FORECAST:
-
         setWeatherForecast();
 
         sendMessage(MESSAGE::MSG_NOTHING);
@@ -162,6 +146,14 @@ class WeatherDisplay {
       default:
         break;
     }
+
+    _composite.update();
+
+    if (_clock) {
+      setNtpClock();
+      _composite.update();
+    }
+
     delay(1);
   }
 

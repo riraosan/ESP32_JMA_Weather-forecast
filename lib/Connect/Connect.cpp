@@ -6,16 +6,17 @@ Connect::Connect() : _portal(_server),
                      _hostName(F("atom_display")),
                      _apName(F("ATOM_DISP-G-AP")),
                      _httpPort(80) {
-  _content = String(F(R"(<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-Place the root page with the sketch application.&ensp;
-__AC_LINK__
-</body>
-</html>)"));
+  _content = String(R"(
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body>
+            Place the root page with the sketch application.&ensp;
+            __AC_LINK__
+            </body>
+            </html>)");
 }
 
 void Connect::begin(void) {

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 // http://linkdata.org/api/1/rdf1s911i/JapaneseLocalGovermentCodeTable_rdf.json
-#define LOCAL_GOV_CODE 27000  // Osaka
+#define LOCAL_GOV_CODE 27000  // Osaka-Fu
 
 enum class MESSAGE : uint32_t {
   MSG_NOTHING = 0,

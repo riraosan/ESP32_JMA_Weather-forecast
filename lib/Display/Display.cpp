@@ -43,6 +43,8 @@ void Display::setWeatherForecast(String filename, String forecastJP, String fore
   _filename   = filename;
   _forecastJP = forecastJP;
   _forecastEN = forecastEN;
+
+  log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
 }
 
 void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
@@ -109,26 +111,28 @@ void Display::displayWeatherInfo(void) {
   videoOut->printEfont(press);
   videoOut->printEfont("hPa");
 
-  // log_i("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
+  log_d("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
 }
 
 void Display::update() {
-  if (_message == MESSAGE::MSG_DISPLAY_CLOCK) {
-    // footer
-    String ntpTime(" __NTP__                     ");
-    ntpTime.replace("__NTP__", _ntpTime);
-    videoOut->setTextColor(0xFFFF, _bgColor);
-    videoOut->printEfont(ntpTime.c_str(), _textOffset_x, _textOffset_y + 16 * 13, 1);  // NTP Clock
-  }
+  String ntpTime(" __NTP__                     ");
+  ntpTime.replace("__NTP__", _ntpTime);
 
   switch (_message) {
-    case MESSAGE::MSG_DISPLAY_FORECAST:
-      displayIcon();
+    case MESSAGE::MSG_DISPLAY_CLOCK:
+      // footer
+      videoOut->setTextColor(0xFFFF, _bgColor);
+      videoOut->printEfont(ntpTime.c_str(), _textOffset_x, _textOffset_y + 16 * 13, 1);  // NTP Clock
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
-    case MESSAGE::MSG_CHECK_DATA:
+    case MESSAGE::MSG_DISPLAY_DATA:
       displayWeatherInfo();
+
+      sendMessage(MESSAGE::MSG_NOTHING);
+      break;
+    case MESSAGE::MSG_DISPLAY_FORECAST:
+      displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -141,6 +145,8 @@ void Display::update() {
 }
 
 void Display::displayIcon(void) {
+  log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
+
   if (gif.open(_filename.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
     log_d("success to open %s", _filename.c_str());
     gif.playFrame(true, NULL);
