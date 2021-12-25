@@ -24,7 +24,7 @@ String Weather::getJMAForecast(void) {
     return url.c_str();
   }
 
-  _httpClient.setReuse(true);
+  _httpClient.setReuse(false);
   _httpClient.begin(_wifiClient, url);
 
   int httpCode = _httpClient.GET();

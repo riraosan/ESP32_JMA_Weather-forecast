@@ -23,7 +23,6 @@ Display::Display() : _temperature(0.0),
                      _bgPressure(_bgColor),
                      _bgHumidity(_bgColor),
                      _filename("") {
-  // deserializeJson(_doc, _weatherCodes);
 }
 
 void Display::setTextOffset(int16_t x, int16_t y) {

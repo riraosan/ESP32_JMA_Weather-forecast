@@ -87,7 +87,7 @@ class WeatherDisplay {
     if (getLocalTime(&info)) {
       sprintf(buffer, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
 
-      if (info.tm_hour == 23 && info.tm_min == 59) {
+      if (info.tm_hour == 23 && info.tm_min == 59 && info.tm_sec == 59) {
         ESP.restart();
         delay(1000);
         return;
