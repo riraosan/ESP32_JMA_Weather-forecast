@@ -6,9 +6,9 @@ MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
 File Display::_file;
 
-int16_t Display::_textOffset_x = 0;
+int16_t Display::_textOffset_x = 5;
 int16_t Display::_textOffset_y = 10;
-int16_t Display::_gifOffset_x  = 10;
+int16_t Display::_gifOffset_x  = 5;
 int16_t Display::_gifOffset_y  = 10;
 
 std::unique_ptr<ESP_8_BIT_GFX> Display::videoOut;
@@ -22,7 +22,8 @@ Display::Display() : _temperature(0.0),
                      _bgTemperature(_bgColor),
                      _bgPressure(_bgColor),
                      _bgHumidity(_bgColor),
-                     _filename("") {
+                     _filename(""),
+                     _IllustrationName("/job_kisyou_yohou.gif") {
 }
 
 void Display::setTextOffset(int16_t x, int16_t y) {
@@ -70,8 +71,8 @@ void Display::setWeatherInfo(float temperature, float humidity, float pressure, 
 
 void Display::displayWeatherInfo(void) {
   // Title
-  videoOut->setTextColor(0xFFFF, _bgColor);
-  videoOut->printEfont(" Osaka Weather Station        ", _textOffset_x, _textOffset_y + 16 * 0, 1);
+  videoOut->setTextColor(0xFFFF, _bgTitle);
+  videoOut->printEfont(" Osaka Weather Station        ", _textOffset_x - 2, _textOffset_y + 16 * 0, 1);
 
   char tempe[10] = {0};
   char humid[10] = {0};
@@ -81,12 +82,14 @@ void Display::displayWeatherInfo(void) {
   sprintf(humid, " %2.0f", _humidity);
   sprintf(press, " %4.1f", _pressure);
 
-  videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 10);
+  // 予報（日本語）
+  videoOut->setCursor(_textOffset_x + 0 * 9 - 2, _textOffset_y + 16 * 10);
   videoOut->setTextColor(0xFFFF, _bgColor);
   videoOut->setTextSize(1);
   videoOut->printEfont(_forecastJP.c_str());
 
-  videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 11);
+  // 予報（英語）
+  videoOut->setCursor(_textOffset_x + 0 * 9 - 2, _textOffset_y + 16 * 11);
   videoOut->setTextColor(0xFFFF, _bgColor);
   videoOut->setTextSize(1);
   videoOut->printEfont(_forecastEN.c_str());
@@ -96,7 +99,7 @@ void Display::displayWeatherInfo(void) {
   videoOut->setTextColor(0xFFFF, _bgTemperature);
   videoOut->setTextSize(1);
   videoOut->printEfont(tempe);
-  videoOut->printEfont("℃");
+  videoOut->printEfont("*C");
 
   // 湿度
   videoOut->setTextColor(0xFFFF, _bgHumidity);
@@ -114,7 +117,7 @@ void Display::displayWeatherInfo(void) {
 }
 
 void Display::update() {
-  String ntpTime(" __NTP__                     ");
+  String ntpTime("__NTP__                      ");
   ntpTime.replace("__NTP__", _ntpTime);
 
   switch (_message) {
@@ -131,6 +134,8 @@ void Display::update() {
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
     case MESSAGE::MSG_DISPLAY_FORECAST:
+      videoOut->fillScreen(_bgColor);
+      displayIllustration();
       displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
@@ -154,6 +159,26 @@ void Display::displayIcon(void) {
   }
 
   gif.close();
+}
+
+void Display::displayIllustration(void) {
+  int16_t gifOffset_x_old = _gifOffset_x;
+  int16_t gifOffset_y_old = _gifOffset_y;
+
+  _gifOffset_x = 110;
+  _gifOffset_y = 10;
+
+  if (gif.open(_IllustrationName.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+    log_d("success to open %s", _IllustrationName.c_str());
+    gif.playFrame(true, NULL);
+  } else {
+    log_e("failure to open %s", _IllustrationName.c_str());
+  }
+
+  gif.close();
+
+  _gifOffset_x = gifOffset_x_old;
+  _gifOffset_y = gifOffset_y_old;
 }
 
 void *Display::_GIFOpenFile(const char *fname, int32_t *pSize) {

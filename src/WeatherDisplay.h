@@ -35,7 +35,7 @@ class WeatherDisplay {
   }
 
   static void timerCallback(void) {
-    sendMessage(MESSAGE::MSG_CHECK_DATA);
+    sendMessage(MESSAGE::MSG_CHECK_FORECAST);
   }
 
   void beginNtpClock(void) {
@@ -125,9 +125,9 @@ class WeatherDisplay {
 #endif
 
     beginNtpClock();
-
     _composite.begin(12, true, 16);
-    sendMessage(MESSAGE::MSG_CHECK_DATA);
+
+    timerCallback();
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   }
 
@@ -136,12 +136,12 @@ class WeatherDisplay {
       case MESSAGE::MSG_CHECK_DATA:
         setInformation();
 
-        sendMessage(MESSAGE::MSG_CHECK_FORECAST);
+        sendMessage(MESSAGE::MSG_NOTHING);
         break;
       case MESSAGE::MSG_CHECK_FORECAST:
         setWeatherForecast();
 
-        sendMessage(MESSAGE::MSG_NOTHING);
+        sendMessage(MESSAGE::MSG_CHECK_DATA);
         break;
       default:
         break;

@@ -1,13 +1,14 @@
 
 #pragma once
 
-#include <memory>
-#include <Arduino.h>
-#include <SPIFFS.h>
 #include <AnimatedGIF.h>
-#include <ESP_8_BIT_GFX.h>
+#include <Arduino.h>
 #include <ArduinoJson.h>
+#include <ESP_8_BIT_GFX.h>
+#include <SPIFFS.h>
 #include <WeatherCode.h>
+
+#include <memory>
 
 class Display {
  public:
@@ -20,8 +21,10 @@ class Display {
   void displayWeatherInfo(void);
   void setWeatherForecast(String filename, String forecastJP, String forecastEN);
   void displayIcon(void);
+  void displayIllustration(void);
 
-  static void sendMessage(MESSAGE message);
+  static void
+  sendMessage(MESSAGE message);
 
   static std::unique_ptr<ESP_8_BIT_GFX> videoOut;
 
@@ -54,9 +57,12 @@ class Display {
   uint16_t _bgHumidity;
 
   // weatherCodes
-  String   _filename;
-  String   _forecastJP;
-  String   _forecastEN;
+  String _filename;
+  String _forecastJP;
+  String _forecastEN;
+
+  // Illustration
+  String _IllustrationName;
 
   static File _file;
 };
