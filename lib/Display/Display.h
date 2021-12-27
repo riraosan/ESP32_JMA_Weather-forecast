@@ -20,7 +20,6 @@ class Display {
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
   void displayWeatherInfo(void);
   void setWeatherForecast(String filename, String forecastJP, String forecastEN);
-  void displayIcon(void);
   void displayIllustration(void);
 
   static void

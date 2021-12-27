@@ -9,7 +9,7 @@ File Display::_file;
 int16_t Display::_textOffset_x = 5;
 int16_t Display::_textOffset_y = 10;
 int16_t Display::_gifOffset_x  = 5;
-int16_t Display::_gifOffset_y  = 10;
+int16_t Display::_gifOffset_y  = 40;
 
 std::unique_ptr<ESP_8_BIT_GFX> Display::videoOut;
 
@@ -17,7 +17,7 @@ Display::Display() : _temperature(0.0),
                      _humidity(0.0),
                      _pressure(0.0),
                      _ntpTime("00:00:00"),
-                     _bgColor(0x0000),
+                     _bgColor(0x1122),
                      _bgTitle(0x0019),
                      _bgTemperature(_bgColor),
                      _bgPressure(_bgColor),
@@ -136,7 +136,6 @@ void Display::update() {
     case MESSAGE::MSG_DISPLAY_FORECAST:
       videoOut->fillScreen(_bgColor);
       displayIllustration();
-      displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -148,25 +147,21 @@ void Display::update() {
   delay(1);
 }
 
-void Display::displayIcon(void) {
-  log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
-
-  if (gif.open(_filename.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
-    log_d("success to open %s", _filename.c_str());
-    gif.playFrame(true, NULL);
-  } else {
-    log_e("failure to open %s", _filename.c_str());
-  }
-
-  gif.close();
-}
-
 void Display::displayIllustration(void) {
-  int16_t gifOffset_x_old = _gifOffset_x;
-  int16_t gifOffset_y_old = _gifOffset_y;
+  // _gifOffset_x = 0;
+  // _gifOffset_y = 0;
+
+  // if (gif.open("/time2_hiru.gif", _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+  //   log_d("success to open /time2_hiru.gif");
+  //   gif.playFrame(true, NULL);
+  // } else {
+  //   log_e("failure to open /time2_hiru.gif");
+  // }
+
+  // gif.close();
 
   _gifOffset_x = 110;
-  _gifOffset_y = 10;
+  _gifOffset_y = 42;
 
   if (gif.open(_IllustrationName.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
     log_d("success to open %s", _IllustrationName.c_str());
@@ -177,8 +172,19 @@ void Display::displayIllustration(void) {
 
   gif.close();
 
-  _gifOffset_x = gifOffset_x_old;
-  _gifOffset_y = gifOffset_y_old;
+  _gifOffset_x = 5;
+  _gifOffset_y = 42;
+
+  log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
+
+  if (gif.open(_filename.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+    log_d("success to open %s", _filename.c_str());
+    gif.playFrame(true, NULL);
+  } else {
+    log_e("failure to open %s", _filename.c_str());
+  }
+
+  gif.close();
 }
 
 void *Display::_GIFOpenFile(const char *fname, int32_t *pSize) {
@@ -267,7 +273,7 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
       if (iCount)  // any opaque pixels?
       {
         for (int xOffset = 0; xOffset < iCount; xOffset++) {
-          videoOut->drawPixel(pDraw->iX + x + xOffset + _gifOffset_x, y + _gifOffset_y + 32, usTemp[xOffset]);
+          videoOut->drawPixel(pDraw->iX + x + xOffset + _gifOffset_x, y + _gifOffset_y, usTemp[xOffset]);
         }
         x += iCount;
         iCount = 0;
@@ -290,7 +296,7 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
     s = pDraw->pPixels;
     // Translate the 8-bit pixels through the RGB565 palette (already byte reversed)
     for (x = 0; x < pDraw->iWidth; x++) {
-      videoOut->drawPixel(x + _textOffset_x, y + _textOffset_y + 32, usPalette[*s++]);
+      videoOut->drawPixel(x + _textOffset_x, y + _textOffset_y, usPalette[*s++]);
     }
   }
 }
