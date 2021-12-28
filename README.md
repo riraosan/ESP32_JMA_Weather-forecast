@@ -7,7 +7,7 @@
 
 This sample code has the following features:
 
-- By connecting ATOM Lite to the RCA connector (video input: NTSC) on a CRT or digital TV, ATOMLite can display weather information. The resolution of the video is 480i.
+- By connecting ATOM Lite to the RCA connector (video input: NTSC) on a CRT or digital TV, ATOM Lite can display weather information. The video resolution is 480i.
 - ATOM Lite connects to the Internet via a WiFi access point.
 - ATOM Lite accesses Thing Speak's channels to get temperature, humidity, and barometric pressure information.
 - ATOM Lite displays the weather forecast for the day based on information from the unofficial JMA(Japan Meteorological Agency) forecast API.
@@ -25,3 +25,7 @@ Thanks to the authors of these libraries.👍
 - Thanks to [@mathworks](https://github.com/mathworks), author of the [thingspeak-arduino](https://github.com/mathworks/thingspeak-arduino) library.
 - THanks to [いらすとや](https://www.irasutoya.com/), author of the Illustration.
 - Thanks to [気象庁 Japan Meteorological Agency](https://www.jma.go.jp/jma/), author of Unofficial JMA forecast API.
+
+
+> If I have seen further it is by [standing on the shoulders of giants](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants).
+> (Issac Newton)
