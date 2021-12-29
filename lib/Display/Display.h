@@ -17,6 +17,7 @@ class Display {
   void update(void);
   void setTextOffset(int16_t x, int16_t y);
   void setNtpTime(String ntpTime);
+  void setYMD(String ymd);
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
   void displayWeatherInfo(void);
   void setWeatherForecast(String filename, String forecastJP, String forecastEN);
@@ -47,6 +48,8 @@ class Display {
   float  _humidity;
   float  _pressure;
   String _ntpTime;
+  String _ymd;
+  String _daytimeFormat;
 
   // color
   uint16_t _bgColor;

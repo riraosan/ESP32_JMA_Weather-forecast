@@ -81,11 +81,15 @@ class WeatherDisplay {
   }
 
   void setNtpClock(void) {
-    char      buffer[16] = {0};
+    char        time[16] = {0};
+    char        ymd[16]  = {0};
+    const char *wday[]   = {"Sun", "Mon", "Thu", "Wed", "Ths", "Fri", "Sat"};
+
     struct tm info;
 
     if (getLocalTime(&info)) {
-      sprintf(buffer, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
+      sprintf(time, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
+      sprintf(ymd, "%s %02d %02d %04d", wday[info.tm_wday], info.tm_mon + 1, info.tm_mday, info.tm_year + 1900);
 
       if (info.tm_hour == 23 && info.tm_min == 59 && info.tm_sec == 59) {
         ESP.restart();
@@ -93,9 +97,8 @@ class WeatherDisplay {
         return;
       }
 
-      _ntpTime = buffer;
-
-      _composite.setNtpTime(_ntpTime);
+      _composite.setYMD(String(ymd));
+      _composite.setNtpTime(String(time));
       _composite.sendMessage(MESSAGE::MSG_DISPLAY_CLOCK);
     }
     _clock = false;

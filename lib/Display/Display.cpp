@@ -16,12 +16,14 @@ std::unique_ptr<ESP_8_BIT_GFX> Display::videoOut;
 Display::Display() : _temperature(0.0),
                      _humidity(0.0),
                      _pressure(0.0),
-                     _ntpTime("00:00:00"),
+                     _ntpTime(""),
+                     _ymd(""),
+                     _daytimeFormat("      __YMD__ __NTP__ "),
                      _bgColor(0x1122),
                      _bgTitle(0x0019),
-                     _bgTemperature(_bgColor),
-                     _bgPressure(_bgColor),
-                     _bgHumidity(_bgColor),
+                     _bgTemperature(0x1c43),
+                     _bgPressure(0x1c43),
+                     _bgHumidity(0x1c43),
                      _filename(""),
                      _IllustrationName("/job_kisyou_yohou.gif") {
 }
@@ -37,6 +39,10 @@ void Display::sendMessage(MESSAGE message) {
 
 void Display::setNtpTime(String ntpTime) {
   _ntpTime = ntpTime;
+}
+
+void Display::setYMD(String ymd) {
+  _ymd = ymd;
 }
 
 void Display::setWeatherForecast(String filename, String forecastJP, String forecastEN) {
@@ -78,38 +84,43 @@ void Display::displayWeatherInfo(void) {
   char humid[10] = {0};
   char press[10] = {0};
 
-  sprintf(tempe, "%2.1f", _temperature);
-  sprintf(humid, " %2.0f", _humidity);
-  sprintf(press, " %4.1f", _pressure);
+  sprintf(tempe, "%6.1f", _temperature);
+  sprintf(humid, "%6.1f", _humidity);
+  sprintf(press, "%6.1f", _pressure);
 
   // 予報（日本語）
-  videoOut->setCursor(_textOffset_x + 0 * 9 - 2, _textOffset_y + 16 * 10);
+  videoOut->setCursor(_textOffset_x + 32, _textOffset_y + 16 * 7);
   videoOut->setTextColor(0xFFFF, _bgColor);
-  videoOut->setTextSize(1);
+  videoOut->setTextSize(2);
   videoOut->printEfont(_forecastJP.c_str());
 
   // 予報（英語）
-  videoOut->setCursor(_textOffset_x + 0 * 9 - 2, _textOffset_y + 16 * 11);
+  videoOut->setCursor(_textOffset_x + 32, _textOffset_y + 16 * 10);
   videoOut->setTextColor(0xFFFF, _bgColor);
   videoOut->setTextSize(1);
   videoOut->printEfont(_forecastEN.c_str());
 
   // 気温
-  videoOut->setCursor(_textOffset_x + 8 * 9 - 2, _textOffset_y + 16 * 12);
+  videoOut->setCursor(_textOffset_x + 8 * 1 - 2, _textOffset_y + 16 * 11);
   videoOut->setTextColor(0xFFFF, _bgTemperature);
   videoOut->setTextSize(1);
+  videoOut->printEfont("Temperature:");
   videoOut->printEfont(tempe);
-  videoOut->printEfont("*C");
+  videoOut->printEfont("*C ");
 
   // 湿度
+  videoOut->setCursor(_textOffset_x + 8 * 1 - 2, _textOffset_y + 16 * 12);
   videoOut->setTextColor(0xFFFF, _bgHumidity);
   videoOut->setTextSize(1);
+  videoOut->printEfont("   Humidity:");
   videoOut->printEfont(humid);
-  videoOut->printEfont("％");
+  videoOut->printEfont("%  ");
 
   // 大気圧
+  videoOut->setCursor(_textOffset_x + 8 * 1 - 2, _textOffset_y + 16 * 13);
   videoOut->setTextColor(0xFFFF, _bgPressure);
   videoOut->setTextSize(1);
+  videoOut->printEfont("   Pressure:");
   videoOut->printEfont(press);
   videoOut->printEfont("hPa");
 
@@ -117,14 +128,14 @@ void Display::displayWeatherInfo(void) {
 }
 
 void Display::update() {
-  String ntpTime("__NTP__                      ");
-  ntpTime.replace("__NTP__", _ntpTime);
-
+  String format;
   switch (_message) {
     case MESSAGE::MSG_DISPLAY_CLOCK:
-      // footer
-      videoOut->setTextColor(0xFFFF, _bgColor);
-      videoOut->printEfont(ntpTime.c_str(), _textOffset_x, _textOffset_y + 16 * 13, 1);  // NTP Clock
+      format = _daytimeFormat;
+      format.replace("__NTP__", _ntpTime);
+      format.replace("__YMD__", _ymd);
+      videoOut->setTextColor(0xFFFF, _bgTitle);
+      videoOut->printEfont(format.c_str(), _textOffset_x - 2, _textOffset_y + 16 * 1, 1);
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -148,18 +159,6 @@ void Display::update() {
 }
 
 void Display::displayIllustration(void) {
-  // _gifOffset_x = 0;
-  // _gifOffset_y = 0;
-
-  // if (gif.open("/time2_hiru.gif", _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
-  //   log_d("success to open /time2_hiru.gif");
-  //   gif.playFrame(true, NULL);
-  // } else {
-  //   log_e("failure to open /time2_hiru.gif");
-  // }
-
-  // gif.close();
-
   _gifOffset_x = 110;
   _gifOffset_y = 42;
 
