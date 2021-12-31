@@ -1,7 +1,7 @@
 
 # ESP32_JMA_Weather-forecast Sample
 
-![sample image](./sample.jpg)
+<img src="./sample.jpg" width="50%"><img src="./ATOM_to_RCA.jpg" width="43%">
 
 ## Overview
 
@@ -26,6 +26,10 @@ Thanks to the authors of these libraries.👍
 - THanks to [いらすとや](https://www.irasutoya.com/), author of the Illustration.
 - Thanks to [気象庁 Japan Meteorological Agency](https://www.jma.go.jp/jma/), author of Unofficial JMA forecast API.
 
+## to U
+
+Thank you for making some contributions.👍
 
 > If I have seen further it is by [standing on the shoulders of giants](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants).
-> (Issac Newton)
+ 
+(Issac Newton)
