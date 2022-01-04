@@ -13,6 +13,10 @@ This sample code has the following features:
 - ATOM Lite displays the weather forecast for the day based on information from the unofficial JMA(Japan Meteorological Agency) forecast API.
 - ATOM Lite displays the time synchronized with an NTP server.
 
+## Note
+
+I found out that the [ESP_8_BIT_composite](https://github.com/Roger-random/ESP_8_BIT_composite) library consumes at least 120KByte of heap memory. If you want to know why, check out the `ESP_8_BIT_composite::frameBufferAlloc()` method of this library.
+
 ## Acknowledgments
 
 Thanks to the authors of these libraries.👍
