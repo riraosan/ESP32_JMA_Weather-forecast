@@ -83,7 +83,7 @@ class WeatherDisplay {
   void setNtpClock(void) {
     char        time[16] = {0};
     char        ymd[16]  = {0};
-    const char *wday[]   = {"Sun", "Mon", "Thu", "Wed", "Ths", "Fri", "Sat"};
+    const char *wday[]   = {"Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."};
 
     struct tm info;
 
