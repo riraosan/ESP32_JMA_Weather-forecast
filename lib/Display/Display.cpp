@@ -18,8 +18,8 @@ Display::Display() : _temperature(0.0),
                      _pressure(0.0),
                      _ntpTime(""),
                      _ymd(""),
-                     _daytimeFormat("      __YMD__ __NTP__ "),
-                     _bgColor(0x1122),
+                     _daytimeFormat("__YMD__ __NTP__"),
+                     _bgColor(0x10cd),
                      _bgTitle(0x0019),
                      _bgTemperature(0x1c43),
                      _bgPressure(0x1c43),
@@ -79,6 +79,7 @@ void Display::displayWeatherInfo(void) {
   // Title
   videoOut->setTextColor(0xFFFF, _bgTitle);
   videoOut->printEfont(" Osaka Weather Station        ", _textOffset_x - 2, _textOffset_y + 16 * 0, 1);
+  videoOut->printEfont("                              ", _textOffset_x - 2, _textOffset_y + 16 * 1, 1);
 
   char tempe[10] = {0};
   char humid[10] = {0};
@@ -89,13 +90,13 @@ void Display::displayWeatherInfo(void) {
   sprintf(press, "%6.1f", _pressure);
 
   // 予報（日本語）
-  videoOut->setCursor(_textOffset_x + 32, _textOffset_y + 16 * 7);
+  videoOut->setCursor(_textOffset_x + 16, _textOffset_y + 16 * 8);
   videoOut->setTextColor(0xFFFF, _bgColor);
   videoOut->setTextSize(2);
   videoOut->printEfont(_forecastJP.c_str());
 
   // 予報（英語）
-  videoOut->setCursor(_textOffset_x + 32, _textOffset_y + 16 * 10);
+  videoOut->setCursor(_textOffset_x + 16, _textOffset_y + 16 * 10);
   videoOut->setTextColor(0xFFFF, _bgColor);
   videoOut->setTextSize(1);
   videoOut->printEfont(_forecastEN.c_str());
@@ -135,7 +136,7 @@ void Display::update() {
       format.replace("__NTP__", _ntpTime);
       format.replace("__YMD__", _ymd);
       videoOut->setTextColor(0xFFFF, _bgTitle);
-      videoOut->printEfont(format.c_str(), _textOffset_x - 2, _textOffset_y + 16 * 1, 1);
+      videoOut->printEfont(format.c_str(), _textOffset_x + 16, _textOffset_y + 16 * 1, 1);
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
