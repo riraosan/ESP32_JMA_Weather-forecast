@@ -21,6 +21,10 @@ I found out that the [ESP_8_BIT_composite](https://github.com/Roger-random/ESP_8
 
 Thanks to the authors of these libraries.👍
 
+> If I have seen further it is by [standing on the shoulders of giants](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants).
+> 
+> Issac Newton
+
 - Thanks to [@Adafruit Industries](https://github.com/adafruit), author of the [Adafruit GFX](https://github.com/adafruit/Adafruit-GFX-Library) library.
 - Thanks to [@Hieromon](https://github.com/Hieromon), author of the [AutoConnect](https://github.com/Hieromon/AutoConnect) library.
 - Thanks to [@tanakamasayuki](https://github.com/tanakamasayuki), author of the [efont](https://github.com/tanakamasayuki/efont) library.
@@ -33,7 +37,3 @@ Thanks to the authors of these libraries.👍
 ## to U
 
 Thank you for making some contributions.👍
-
-> If I have seen further it is by [standing on the shoulders of giants](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants).
- 
-(Issac Newton)
