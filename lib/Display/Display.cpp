@@ -57,7 +57,7 @@ void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
   videoOut.reset(new ESP_8_BIT_GFX(ntsc, colorDepth));
 
   videoOut->begin();
-  videoOut->copyAfterSwap = true;  // gif library depends on data from previous buffer
+  videoOut->setCopyAfterSwap(true);  // gif library depends on data from previous buffer
   videoOut->fillScreen(_bgColor);
   videoOut->waitForFrame();
 
