@@ -1,21 +1,22 @@
 
 #pragma once
 
-#include <AnimatedGIF.h>
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <ESP_8_BIT_GFX.h>
-#include <SPIFFS.h>
-#include <WeatherCode.h>
-
 #include <memory>
+#include <Arduino.h>
+#include <SPIFFS.h>
+#include <AnimatedGIF.h>
+#include <ArduinoJson.h>
+#include <WeatherCode.h>
+#include <efontEnableJaMini.h>
+#include <efontFontData.h>
+#include <M5Unified.h>
+#include <ESP32_8BIT_CVBS.h>
 
 class Display {
- public:
+public:
   Display(void);
-  void begin(uint16_t irPin, bool ntsc, uint8_t colorDepth);
+  void begin(void);
   void update(void);
-  void setTextOffset(int16_t x, int16_t y);
   void setNtpTime(String ntpTime);
   void setYMD(String ymd);
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
@@ -23,25 +24,16 @@ class Display {
   void setWeatherForecast(String filename, String forecastJP, String forecastEN);
   void displayIllustration(void);
 
-  static void
-  sendMessage(MESSAGE message);
+  static void sendMessage(MESSAGE message);
 
-  static std::unique_ptr<ESP_8_BIT_GFX> videoOut;
-
- private:
+private:
   static inline void    _GIFDraw(GIFDRAW *pDraw);
   static inline void   *_GIFOpenFile(const char *fname, int32_t *pSize);
   static inline void    _GIFCloseFile(void *pHandle);
   static inline int32_t _GIFReadFile(GIFFILE *pFile, uint8_t *pBuf, int32_t iLen);
   static inline int32_t _GIFSeekFile(GIFFILE *pFile, int32_t iPosition);
 
-  AnimatedGIF gif;
-
-  static MESSAGE _message;
-  static int16_t _textOffset_x;
-  static int16_t _textOffset_y;
-  static int16_t _gifOffset_x;
-  static int16_t _gifOffset_y;
+  AnimatedGIF _gif;
 
   // data
   float  _temperature;
@@ -67,4 +59,14 @@ class Display {
   String _IllustrationName;
 
   static File _file;
+
+  static int _width;
+  static int _height;
+
+  static MESSAGE _message;
+
+  static ESP32_8BIT_CVBS _display;
+  static M5Canvas        _animation;
+  M5Canvas               _title;
+  M5Canvas               _data;
 };

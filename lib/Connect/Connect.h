@@ -4,6 +4,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <Task.h>
+
 #if defined(ARDUINO_ARCH_ESP32)
 #include <Arduino.h>
 #include <WiFi.h>
@@ -16,13 +17,15 @@ using WiFiWebServer = WebServer;
 #endif
 
 class Connect : public Task {
- public:
+public:
   Connect();
   void begin(void);
   void begin(const char* SSID, const char* PASSWORD);
+  void startWiFi(void);
+
+private:
   void run(void* data);
 
- private:
   WiFiWebServer     _server;
   AutoConnectConfig _config;
   AutoConnect       _portal;

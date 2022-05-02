@@ -1,111 +1,130 @@
 
+#include <memory>
 #include <Weather.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+#include <StreamUtils.h>
 #include <esp32-hal-log.h>
-#include <filter.h>
+#include <secrets.h>
 
-Weather::Weather() : _url("http://www.jma.go.jp/bosai/forecast/data/forecast/__WEATHER_CODE__0.json") {
-  deserializeJson(_codeFilter, codeFilter);
+Weather::Weather() : _url("https://www.jma.go.jp/bosai/forecast/data/forecast/__WEATHER_CODE__0.json"),
+                     _codeDoc(6144) {
 }
 
-void Weather::begin(WiFiClient& client) {
-  _wifiClient = client;
+void Weather::begin(uint16_t localGovernmentCode) {
+  setAreaCode(localGovernmentCode);
+
+  if (!SPIFFS.begin()) {
+    log_e("File system is not mounted");
+  }
 }
 
 void Weather::setAreaCode(uint16_t localGovernmentCode) {
   _localGovernmentCode = localGovernmentCode;
 }
 
-String Weather::getJMAForecast(void) {
-  String url;
+String Weather::getJMAForecastJson(void) {
+  _url.replace("__WEATHER_CODE__", String(_localGovernmentCode));
 
-  if (_localGovernmentCode) {
-    url = _createURL(_localGovernmentCode);
-  } else {
-    return url.c_str();
-  }
+  std::unique_ptr<WiFiClientSecure> _jmaClient(new WiFiClientSecure);
+  std::unique_ptr<HTTPClient>       _httpClient(new HTTPClient);
 
-  _httpClient.setReuse(false);
-  _httpClient.begin(_wifiClient, url);
+  _jmaClient->setCACert(jma_root_ca);
+  _jmaClient->setHandshakeTimeout(180);
+  _httpClient->setReuse(true);
 
-  int httpCode = _httpClient.GET();
+  _httpClient->begin(*_jmaClient, _url.c_str());
+
+  int httpCode = _httpClient->GET();
 
   if (httpCode > 0) {
     if (httpCode == HTTP_CODE_OK) {
-      _response = _httpClient.getString();
+      ReadLoggingStream loggingStream(_httpClient->getStream(), Serial);
 
-      // log_i("Response\n%s", _response.c_str());
+      StaticJsonDocument<500> codeFilter;
+      deserializeJson(codeFilter, g_codeFilter);
 
       DeserializationError error = deserializeJson(_codeDoc,
-                                                   _response.c_str(),
-                                                   _response.length(),
-                                                   DeserializationOption::Filter(_codeFilter));
+                                                   loggingStream,
+                                                   DeserializationOption::Filter(codeFilter));
 
       if (error) {
         log_e("deserializeJson() failed: %s", error.f_str());
-        _httpClient.end();
+        _httpClient->end();
         return error.f_str();
       }
 
-      JsonObject root_0 = _codeDoc[0];
+      JsonObject root_0 = _codeDoc[0];  // 0 or 1
       if (!root_0.isNull()) {
         const char* publishingOffice = root_0["publishingOffice"];
         const char* reportDatetime   = root_0["reportDatetime"];
 
-        log_i("publishingOffice  %s", publishingOffice);
-        log_i("  reportDatetime  %s", reportDatetime);
+        _publishingOffice = (const char*)publishingOffice;
+        _reportDatetime   = (const char*)reportDatetime;
 
-        JsonArray root_0_timeSeries = root_0["timeSeries"];
+        Serial.println("publishingOffice  " + _publishingOffice);
+        Serial.println("  reportDatetime  " + _reportDatetime);
 
-        if (!root_0_timeSeries.isNull()) {
-          const char* area_name = root_0_timeSeries[0]["areas"][0]["area"]["name"];
-          const char* area_code = root_0_timeSeries[0]["areas"][0]["area"]["code"];
+        JsonArray timeSeries = root_0["timeSeries"];
 
-          JsonArray weatherCodes = root_0_timeSeries[0]["areas"][0]["weatherCodes"];
-          JsonArray weathers     = root_0_timeSeries[0]["areas"][0]["weathers"];
+        if (!timeSeries.isNull()) {
+          JsonObject  areas_0   = timeSeries[0]["areas"][0];
+          const char* area_name = areas_0["area"]["name"];
+          const char* area_code = areas_0["area"]["code"];
 
-          if (!weatherCodes.isNull() && !weathers.isNull()) {
-            _areaName        = (const char*)area_name;
-            _areaCode        = (const char*)area_code;
+          JsonArray weatherCodes = areas_0["weatherCodes"];
+          JsonArray weathers     = areas_0["weathers"];
+
+          _areaName = (const char*)area_name;
+          _areaCode = (const char*)area_code;
+          Serial.println("       area_name  " + String((const char*)area_name));
+          Serial.println("       area_code  " + String((const char*)area_code));
+
+          if (!weatherCodes.isNull()) {
             _todayForecast   = (const char*)weatherCodes[0];
             _nextdayForecast = (const char*)weatherCodes[1];
-            _weathers0       = (const char*)weathers[0];
-            _weathers1       = (const char*)weathers[1];
+            Serial.println(" weatherCodes[0]  " + String((const char*)weatherCodes[0]));
+            Serial.println(" weatherCodes[1]  " + String((const char*)weatherCodes[1]));
+            Serial.println(" weatherCodes[2]  " + String((const char*)weatherCodes[2]));
+          }
 
-            log_i("       area_name  %s", _areaName.c_str());
-            log_i("       area_code  %s", _areaCode.c_str());
-            log_i(" weatherCodes[0]  %s", _todayForecast.c_str());
-            log_i(" weatherCodes[1]  %s", _nextdayForecast.c_str());
-            log_i("     weathers[0]  %s", _weathers0.c_str());
-            log_i("     weathers[1]  %s", _weathers1.c_str());
+          if (!weathers.isNull()) {
+            _weathers0 = (const char*)weathers[0];
+            _weathers1 = (const char*)weathers[1];
+
+            Serial.println("     weathers[0]  " + String((const char*)weathers[0]));
+            Serial.println("     weathers[1]  " + String((const char*)weathers[1]));
+            Serial.println("     weathers[2]  " + String((const char*)weathers[2]));
           }
         }
       }
-
-      _httpClient.end();
-      return "success";
+      _httpClient->end();
+      return String("success");
     }
   }
 
-  String error = _httpClient.errorToString(httpCode);
-
-  _httpClient.end();
+  String error = _httpClient->errorToString(httpCode);
+  _httpClient->end();
 
   log_e("[HTTP] GET... failed, error: %s", error.c_str());
   return error;
 }
 
-void Weather::getJMAWeathers(void) {
-  String forecastFilter(R"({"__CODE__": [true]})");
-  forecastFilter.replace("__CODE__", _todayForecast);
+void Weather::makeJMAForecastString(void) {
+  String filter(R"({"__CODE__": [true]})");
+  filter.replace("__CODE__", _todayForecast);
 
-  deserializeJson(_forecastFilter, forecastFilter);
+  StaticJsonDocument<255> _forecastDoc;
+  StaticJsonDocument<50>  _filter;
+  deserializeJson(_filter, filter);
 
   File file = SPIFFS.open("/codes.json");
 
   if (file) {
     DeserializationError error = deserializeJson(_forecastDoc,
                                                  file,
-                                                 DeserializationOption::Filter(_forecastFilter));
+                                                 DeserializationOption::Filter(_filter));
+
     if (error) {
       log_e("Failed to read codes.json.");
       file.close();
@@ -146,16 +165,4 @@ String Weather::getWeathersEn(void) {
 
 String Weather::getICONFilename(void) {
   return _iconFile;
-}
-
-String Weather::_createURL(uint16_t localGovernmentCode) {
-  String code(localGovernmentCode);
-  _url.replace("__WEATHER_CODE__", code);
-
-  log_d("%s", _url.c_str());
-  return _url;
-}
-
-void Weather::update() {
-  delay(1);
 }

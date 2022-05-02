@@ -4,14 +4,13 @@
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
+ESP32_8BIT_CVBS Display::_display;
+M5Canvas        Display::_animation;
+
 File Display::_file;
 
-int16_t Display::_textOffset_x = 5;
-int16_t Display::_textOffset_y = 10;
-int16_t Display::_gifOffset_x  = 5;
-int16_t Display::_gifOffset_y  = 40;
-
-std::unique_ptr<ESP_8_BIT_GFX> Display::videoOut;
+int Display::_width  = 0;
+int Display::_height = 0;
 
 Display::Display() : _temperature(0.0),
                      _humidity(0.0),
@@ -26,11 +25,6 @@ Display::Display() : _temperature(0.0),
                      _bgHumidity(0x1c43),
                      _filename(""),
                      _IllustrationName("/job_kisyou_yohou.gif") {
-}
-
-void Display::setTextOffset(int16_t x, int16_t y) {
-  _textOffset_x = x;
-  _textOffset_y = y;
 }
 
 void Display::sendMessage(MESSAGE message) {
@@ -53,20 +47,30 @@ void Display::setWeatherForecast(String filename, String forecastJP, String fore
   log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
 }
 
-void Display::begin(uint16_t irPin, bool ntsc, uint8_t colorDepth) {
-  videoOut.reset(new ESP_8_BIT_GFX(ntsc, colorDepth));
+void Display::begin(void) {
+  _display.begin();
 
-  videoOut->begin();
-  videoOut->setCopyAfterSwap(true);  // gif library depends on data from previous buffer
-  videoOut->fillScreen(_bgColor);
-  videoOut->waitForFrame();
+  _display.startWrite();
 
-  if (!SPIFFS.begin()) {
-    log_e("FILESYSTEM Mount Failed");
-    return;
-  }
+  _width  = 140;
+  _height = 160;
 
-  sendMessage(MESSAGE::MSG_CHECK_DATA);
+  _display.fillScreen(_bgColor);
+  _display.setRotation(0);
+  _display.setColorDepth(8);
+
+  _animation.setPsram(false);
+  _animation.setColorDepth(8);
+
+  _data.setFont(&fonts::efont);
+  _data.setTextWrap(true, true);
+  _data.setPsram(false);
+  _data.setColorDepth(8);
+
+  _title.setFont(&fonts::efont);
+  _title.setTextWrap(true, true);
+  _title.setPsram(false);
+  _title.setColorDepth(8);
 }
 
 void Display::setWeatherInfo(float temperature, float humidity, float pressure, String time) {
@@ -76,67 +80,89 @@ void Display::setWeatherInfo(float temperature, float humidity, float pressure, 
 }
 
 void Display::displayWeatherInfo(void) {
-  // Title
-  videoOut->setTextColor(0xFFFF, _bgTitle);
-  videoOut->printEfont(" Osaka Weather Station        ", _textOffset_x - 2, _textOffset_y + 16 * 0, 1);
-  videoOut->printEfont("                              ", _textOffset_x - 2, _textOffset_y + 16 * 1, 1);
+  if (!_data.createSprite(174, 96)) {
+    log_e("data allocation failed");
+    return;
+  }
 
   char tempe[10] = {0};
   char humid[10] = {0};
   char press[10] = {0};
 
-  sprintf(tempe, "%6.1f", _temperature);
-  sprintf(humid, "%6.1f", _humidity);
-  sprintf(press, "%6.1f", _pressure);
+  sprintf(tempe, "%4.1f", _temperature);
+  sprintf(humid, "%4.1f", _humidity);
+  sprintf(press, "%4.1f", _pressure);
+
+  _data.fillSprite(_bgColor);
 
   // 予報（日本語）
-  videoOut->setCursor(_textOffset_x + 16, _textOffset_y + 16 * 8);
-  videoOut->setTextColor(0xFFFF, _bgColor);
-  videoOut->setTextSize(2);
-  videoOut->printEfont(_forecastJP.c_str());
+  _data.setCursor(0, 16 * 0);
+  _data.setTextColor(0xFFFF, _bgColor);
+  _data.setTextSize(2);
+  _data.print(" ");
+  _data.print(_forecastJP.c_str());
 
   // 予報（英語）
-  videoOut->setCursor(_textOffset_x + 16, _textOffset_y + 16 * 10);
-  videoOut->setTextColor(0xFFFF, _bgColor);
-  videoOut->setTextSize(1);
-  videoOut->printEfont(_forecastEN.c_str());
+  _data.setCursor(0, 16 * 2);
+  _data.setTextColor(0xFFFF, _bgColor);
+  _data.setTextSize(1);
+  _data.print("  ");
+  _data.print(_forecastEN.c_str());
 
   // 気温
-  videoOut->setCursor(_textOffset_x + 8 * 1 - 2, _textOffset_y + 16 * 11);
-  videoOut->setTextColor(0xFFFF, _bgTemperature);
-  videoOut->setTextSize(1);
-  videoOut->printEfont("Temperature:");
-  videoOut->printEfont(tempe);
-  videoOut->printEfont("*C ");
+  _data.setCursor(0, 16 * 3);
+  _data.setTextColor(0xFFFF, _bgTemperature);
+  _data.setTextSize(1);
+  _data.print(" Temperature:");
+  _data.print(tempe);
+  _data.print("*C ");
 
   // 湿度
-  videoOut->setCursor(_textOffset_x + 8 * 1 - 2, _textOffset_y + 16 * 12);
-  videoOut->setTextColor(0xFFFF, _bgHumidity);
-  videoOut->setTextSize(1);
-  videoOut->printEfont("   Humidity:");
-  videoOut->printEfont(humid);
-  videoOut->printEfont("%  ");
+  _data.setCursor(0, 16 * 4);
+  _data.setTextColor(0xFFFF, _bgHumidity);
+  _data.setTextSize(1);
+  _data.print("    Humidity:");
+  _data.print(humid);
+  _data.print("%  ");
 
   // 大気圧
-  videoOut->setCursor(_textOffset_x + 8 * 1 - 2, _textOffset_y + 16 * 13);
-  videoOut->setTextColor(0xFFFF, _bgPressure);
-  videoOut->setTextSize(1);
-  videoOut->printEfont("   Pressure:");
-  videoOut->printEfont(press);
-  videoOut->printEfont("hPa");
+  _data.setCursor(0, 16 * 5);
+  _data.setTextColor(0xFFFF, _bgPressure);
+  _data.setTextSize(1);
+  _data.print("    Pressure:");
+  _data.print(press);
+  _data.print("hPa");
 
   log_d("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
+
+  _data.pushSprite(&_display, 2, 140);
+  _data.deleteSprite();
 }
 
 void Display::update() {
   String format;
   switch (_message) {
     case MESSAGE::MSG_DISPLAY_CLOCK:
+      if (!_title.createSprite(239, 32)) {
+        log_e("title allocation failed");
+        return;
+      }
+
+      _title.fillSprite(_bgTitle);
+      // Title
+      _title.setTextColor(0xFFFF, _bgTitle);
+      _title.setTextSize(1);
+      _title.setCursor(0, 16 * 0);
+      _title.print(" Osaka Weather Station");
+
       format = _daytimeFormat;
       format.replace("__NTP__", _ntpTime);
       format.replace("__YMD__", _ymd);
-      videoOut->setTextColor(0xFFFF, _bgTitle);
-      videoOut->printEfont(format.c_str(), _textOffset_x + 16, _textOffset_y + 16 * 1, 1);
+      _title.setCursor(16, 16 * 1);
+      _title.print(format.c_str());
+
+      _title.pushSprite(&_display, 2, 9);
+      _title.deleteSprite();
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -146,7 +172,6 @@ void Display::update() {
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
     case MESSAGE::MSG_DISPLAY_FORECAST:
-      videoOut->fillScreen(_bgColor);
       displayIllustration();
 
       sendMessage(MESSAGE::MSG_NOTHING);
@@ -155,36 +180,29 @@ void Display::update() {
       break;
   }
 
-  videoOut->waitForFrame();
+  _display.display();
+
   delay(1);
 }
 
 void Display::displayIllustration(void) {
-  _gifOffset_x = 110;
-  _gifOffset_y = 42;
+  if (!_animation.createSprite(_width, _height)) {
+    log_e("image allocation failed");
+    return;
+  }
 
-  if (gif.open(_IllustrationName.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+  _animation.fillSprite(_bgColor);
+  if (_gif.open(_IllustrationName.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
     log_d("success to open %s", _IllustrationName.c_str());
-    gif.playFrame(true, NULL);
+    _gif.playFrame(true, NULL);
   } else {
     log_e("failure to open %s", _IllustrationName.c_str());
   }
 
-  gif.close();
+  _gif.close();
 
-  _gifOffset_x = 5;
-  _gifOffset_y = 42;
-
-  log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
-
-  if (gif.open(_filename.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
-    log_d("success to open %s", _filename.c_str());
-    gif.playFrame(true, NULL);
-  } else {
-    log_e("failure to open %s", _filename.c_str());
-  }
-
-  gif.close();
+  _animation.pushSprite(&_display, 110, 70);
+  _animation.deleteSprite();
 }
 
 void *Display::_GIFOpenFile(const char *fname, int32_t *pSize) {
@@ -234,8 +252,12 @@ int32_t Display::_GIFSeekFile(GIFFILE *pFile, int32_t iPosition) {
 
 void Display::_GIFDraw(GIFDRAW *pDraw) {
   uint8_t  *s;
-  uint16_t *d, *usPalette, usTemp[320];
-  int       x, y;
+  uint16_t *d, *usPalette, usTemp[240];
+  int       x, y, iWidth;
+
+  iWidth = pDraw->iWidth;
+  if (iWidth > _width)
+    iWidth = _width;
 
   usPalette = pDraw->pPalette;
   y         = pDraw->iY + pDraw->y;  // current line
@@ -243,41 +265,42 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
   s = pDraw->pPixels;
   if (pDraw->ucDisposalMethod == 2)  // restore to background color
   {
-    for (x = 0; x < pDraw->iWidth; x++) {
+    for (x = 0; x < iWidth; x++) {
       if (s[x] == pDraw->ucTransparent)
         s[x] = pDraw->ucBackground;
     }
     pDraw->ucHasTransparency = 0;
   }
+
   // Apply the new pixels to the main image
   if (pDraw->ucHasTransparency)  // if transparency used
   {
     uint8_t *pEnd, c, ucTransparent = pDraw->ucTransparent;
     int      x, iCount;
-    pEnd   = s + pDraw->iWidth;
+    pEnd   = s + iWidth;
     x      = 0;
     iCount = 0;  // count non-transparent pixels
-    while (x < pDraw->iWidth) {
+    while (x < iWidth) {
       c = ucTransparent - 1;
       d = usTemp;
       while (c != ucTransparent && s < pEnd) {
         c = *s++;
         if (c == ucTransparent)  // done, stop
         {
-          s--;    // back up to treat it like transparent
-        } else {  // opaque
+          s--;  // back up to treat it like transparent
+        } else  // opaque
+        {
           *d++ = usPalette[c];
           iCount++;
         }
-      }            // while looking for opaque pixels
-      if (iCount)  // any opaque pixels?
-      {
-        for (int xOffset = 0; xOffset < iCount; xOffset++) {
-          videoOut->drawPixel(pDraw->iX + x + xOffset + _gifOffset_x, y + _gifOffset_y, usTemp[xOffset]);
-        }
+      }              // while looking for opaque pixels
+      if (iCount) {  // any opaque pixels?
+        _animation.setWindow(pDraw->iX + x, y, iCount, 1);
+        _animation.pushPixels((uint16_t *)usTemp, iCount, true);
         x += iCount;
         iCount = 0;
       }
+
       // no, look for a run of transparent pixels
       c = ucTransparent;
       while (c == ucTransparent && s < pEnd) {
@@ -295,8 +318,11 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
   } else {
     s = pDraw->pPixels;
     // Translate the 8-bit pixels through the RGB565 palette (already byte reversed)
-    for (x = 0; x < pDraw->iWidth; x++) {
-      videoOut->drawPixel(x + _textOffset_x, y + _textOffset_y, usPalette[*s++]);
+    for (x = 0; x < iWidth; x++) {
+      usTemp[x] = usPalette[*s++];
     }
+
+    _animation.setWindow(pDraw->iX, y, iWidth, 1);
+    _animation.pushPixels((uint16_t *)usTemp, iWidth, true);
   }
 }

@@ -1,19 +1,40 @@
 
 #include <Arduino.h>
-#include <SPIFFS.h>
-#include <HTTPClient.h>
-#include <WiFiClient.h>
-#include <ArduinoJson.h>
 #include <WeatherCode.h>
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
+
+// R"()" = Raw String Literals(C++)
+constexpr char g_codeFilter[] = R"(
+[
+  {
+    "publishingOffice": true,
+    "reportDatetime": true,
+    "timeSeries": [
+      {
+        "timeDefines": true,
+        "areas": [
+          {
+            "area": true,
+            "weatherCodes": true,
+            "weathers": true,
+            "winds": false,
+            "waves": false
+          }
+        ]
+      }
+    ]
+  }
+])";
 
 class Weather {
- public:
+public:
   Weather();
 
-  void   begin(WiFiClient& client);
+  void   begin(uint16_t localGovernmentCode);
   void   setAreaCode(uint16_t localGovernmentCode);
-  String getJMAForecast(void);
-  void   getJMAWeathers(void);
+  String getJMAForecastJson(void);
+  void   makeJMAForecastString(void);
   String getTodayForecast(void);
   String getNextdayForecast(void);
   String getWeathersJp(void);
@@ -21,8 +42,7 @@ class Weather {
   String getICONFilename(void);
   void   update();
 
- private:
-  String   _createURL(uint16_t localGovernmentCode);
+private:
   uint16_t _localGovernmentCode;
 
   String _request;
@@ -38,13 +58,8 @@ class Weather {
   String _forecastJP;
   String _forecastEN;
   String _iconFile;
+  String _publishingOffice;
+  String _reportDatetime;
 
-  WiFiClient _wifiClient;
-  HTTPClient _httpClient;
-
-  StaticJsonDocument<3000> _codeDoc;
-  StaticJsonDocument<400>  _codeFilter;
-
-  StaticJsonDocument<255> _forecastDoc;
-  StaticJsonDocument<100> _forecastFilter;
+  DynamicJsonDocument _codeDoc;
 };

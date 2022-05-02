@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Connect.h>
+#include <secrets.h>
 #include <esp32-hal-log.h>
 
 Connect::Connect() : _portal(_server),
@@ -7,16 +8,30 @@ Connect::Connect() : _portal(_server),
                      _apName(F("ATOM_DISP-G-AP")),
                      _httpPort(80) {
   _content = String(R"(
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
-            </head>
-            <body>
-            Place the root page with the sketch application.&ensp;
-            __AC_LINK__
-            </body>
-            </html>)");
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+Place the root page with the sketch application.&ensp; __AC_LINK__
+
+</body>
+</html>)");
+}
+
+void Connect::startWiFi(void) {
+  setTaskName("AutoConnect");
+  setTaskSize(4096 * 1);
+  setTaskPriority(2);
+  setCore(0);
+#if defined(TEST_PERIOD)
+  begin(SECRET_SSID, SECRET_PASS);
+#else
+  begin();
+#endif
+  start(nullptr);
 }
 
 void Connect::begin(void) {
@@ -24,7 +39,6 @@ void Connect::begin(void) {
 }
 
 void Connect::begin(const char* SSID, const char* PASSWORD) {
-  // Responder of root page and apply page handled directly from WebServer class.
   _server.on("/", [&]() {
     _content.replace("__AC_LINK__", String(AUTOCONNECT_LINK(COG_16)));
     _server.send(200, "text/html", _content);
@@ -33,6 +47,7 @@ void Connect::begin(const char* SSID, const char* PASSWORD) {
   _config.autoReconnect = true;
   _config.ota           = AC_OTA_BUILTIN;
   _config.apid          = _apName;
+
   _portal.config(_config);
 
   bool result = false;
@@ -58,7 +73,7 @@ void Connect::begin(const char* SSID, const char* PASSWORD) {
 }
 
 void Connect::run(void* data) {
-  while (1) {
+  for (;;) {
     _portal.handleClient();
     delay(1);
   }
