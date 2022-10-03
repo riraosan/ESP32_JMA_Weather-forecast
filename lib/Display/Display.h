@@ -7,8 +7,6 @@
 #include <AnimatedGIF.h>
 #include <ArduinoJson.h>
 #include <WeatherCode.h>
-#include <efontEnableJaMini.h>
-#include <efontFontData.h>
 #include <M5Unified.h>
 #include <ESP32_8BIT_CVBS.h>
 
