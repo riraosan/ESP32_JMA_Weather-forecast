@@ -17,13 +17,13 @@ using WiFiWebServer = WebServer;
 #endif
 
 class Connect : public Task {
-public:
+ public:
   Connect();
   void begin(void);
   void begin(const char* SSID, const char* PASSWORD);
   void startWiFi(void);
 
-private:
+ private:
   void run(void* data);
 
   WiFiWebServer     _server;

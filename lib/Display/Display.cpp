@@ -52,9 +52,6 @@ void Display::begin(void) {
 
   _display.startWrite();
 
-  _width  = 140;
-  _height = 160;
-
   _display.fillScreen(_bgColor);
   _display.setRotation(0);
   _display.setColorDepth(8);
@@ -62,12 +59,12 @@ void Display::begin(void) {
   _animation.setPsram(false);
   _animation.setColorDepth(8);
 
-  _data.setFont(&fonts::efont);
+  _data.setFont(&fonts::efontJA_16);
   _data.setTextWrap(true, true);
   _data.setPsram(false);
   _data.setColorDepth(8);
 
-  _title.setFont(&fonts::efont);
+  _title.setFont(&fonts::efontJA_16);
   _title.setTextWrap(true, true);
   _title.setPsram(false);
   _title.setColorDepth(8);
@@ -113,29 +110,29 @@ void Display::displayWeatherInfo(void) {
   _data.setCursor(0, 16 * 3);
   _data.setTextColor(0xFFFF, _bgTemperature);
   _data.setTextSize(1);
-  _data.print(" Temperature:");
+  _data.print("Temperature:");
   _data.print(tempe);
-  _data.print("*C ");
+  _data.print("*C   ");
 
   // 湿度
   _data.setCursor(0, 16 * 4);
   _data.setTextColor(0xFFFF, _bgHumidity);
   _data.setTextSize(1);
-  _data.print("    Humidity:");
+  _data.print("   Humidity:");
   _data.print(humid);
-  _data.print("%  ");
+  _data.print("%    ");
 
   // 大気圧
   _data.setCursor(0, 16 * 5);
   _data.setTextColor(0xFFFF, _bgPressure);
   _data.setTextSize(1);
-  _data.print("    Pressure:");
+  _data.print("   Pressure:");
   _data.print(press);
   _data.print("hPa");
 
   log_d("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
 
-  _data.pushSprite(&_display, 2, 140);
+  _data.pushSprite(&_display, 3, 125);
   _data.deleteSprite();
 }
 
@@ -173,6 +170,7 @@ void Display::update() {
       break;
     case MESSAGE::MSG_DISPLAY_FORECAST:
       displayIllustration();
+      displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -185,7 +183,36 @@ void Display::update() {
   delay(1);
 }
 
+void Display::displayIcon(void) {
+  log_d("%s, %s, %s", _filename.c_str(), _forecastJP.c_str(), _forecastEN.c_str());
+
+  _width  = 120;
+  _height = 120;
+
+  if (!_animation.createSprite(_width, _height)) {
+    log_e("image allocation failed");
+    return;
+  }
+
+  _animation.fillSprite(_bgColor);
+  if (_gif.open(_filename.c_str(), _GIFOpenFile, _GIFCloseFile, _GIFReadFile, _GIFSeekFile, _GIFDraw)) {
+    log_d("success to open %s", _filename.c_str());
+    _gif.playFrame(true, NULL);
+  } else {
+    log_e("failure to open %s", _filename.c_str());
+  }
+
+  _gif.close();
+  _gif.reset();
+
+  _animation.pushSprite(&_display, 0, 33);
+  _animation.deleteSprite();
+}
+
 void Display::displayIllustration(void) {
+  _width  = 140;
+  _height = 160;
+
   if (!_animation.createSprite(_width, _height)) {
     log_e("image allocation failed");
     return;
@@ -200,8 +227,9 @@ void Display::displayIllustration(void) {
   }
 
   _gif.close();
+  _gif.reset();
 
-  _animation.pushSprite(&_display, 110, 70);
+  _animation.pushSprite(&_display, 110, 50);
   _animation.deleteSprite();
 }
 
@@ -295,6 +323,7 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
         }
       }              // while looking for opaque pixels
       if (iCount) {  // any opaque pixels?
+
         _animation.setWindow(pDraw->iX + x, y, iCount, 1);
         _animation.pushPixels((uint16_t *)usTemp, iCount, true);
         x += iCount;

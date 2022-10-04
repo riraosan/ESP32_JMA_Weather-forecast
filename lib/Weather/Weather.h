@@ -28,7 +28,7 @@ constexpr char g_codeFilter[] = R"(
 ])";
 
 class Weather {
-public:
+ public:
   Weather();
 
   void   begin(uint16_t localGovernmentCode);
@@ -42,7 +42,7 @@ public:
   String getICONFilename(void);
   void   update();
 
-private:
+ private:
   uint16_t _localGovernmentCode;
 
   String _request;

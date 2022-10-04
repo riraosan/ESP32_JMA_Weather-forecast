@@ -11,7 +11,7 @@
 #include <ESP32_8BIT_CVBS.h>
 
 class Display {
-public:
+ public:
   Display(void);
   void begin(void);
   void update(void);
@@ -20,11 +20,12 @@ public:
   void setWeatherInfo(float temperature, float humidity, float pressure, String time);
   void displayWeatherInfo(void);
   void setWeatherForecast(String filename, String forecastJP, String forecastEN);
+  void displayIcon(void);
   void displayIllustration(void);
 
   static void sendMessage(MESSAGE message);
 
-private:
+ private:
   static inline void    _GIFDraw(GIFDRAW *pDraw);
   static inline void   *_GIFOpenFile(const char *fname, int32_t *pSize);
   static inline void    _GIFCloseFile(void *pHandle);

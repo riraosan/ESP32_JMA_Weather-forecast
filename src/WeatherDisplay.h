@@ -23,7 +23,7 @@
 #include <secrets.h>
 
 class WeatherDisplay {
-public:
+ public:
   WeatherDisplay() : _weatherStationChannelNumber(SECRET_CH_ID),
                      _field{1, 2, 3, 4, 5, 6, 7, 8},
                      _statusCode(0) {
@@ -47,6 +47,7 @@ public:
   }
 
   void setInformation(void) {
+    log_i("here");
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
     std::unique_ptr<WiFiClientSecure> client(new WiFiClientSecure);
@@ -68,14 +69,16 @@ public:
 
       log_i("[%s] %2.1f*C, %2.1f%%, %4.1fhPa", createdAt.c_str(), temperature, humidity, pressure);
 
-      //_disp.setWeatherInfo(temperature, humidity, pressure, createdAt);
-      //_disp.sendMessage(MESSAGE::MSG_DISPLAY_DATA);
+      _disp.setWeatherInfo(temperature, humidity, pressure, createdAt);
+      _disp.sendMessage(MESSAGE::MSG_DISPLAY_DATA);
     } else {
       log_e("Problem reading channel. HTTP error code %d", _statusCode);
     }
   }
 
   void setWeatherForecast(void) {
+    log_i("here");
+
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
     if (_weather.getJMAForecastJson().equals("success")) {
@@ -83,8 +86,8 @@ public:
 
       _weather.makeJMAForecastString();
 
-      //_disp.setWeatherForecast(_weather.getICONFilename(), _weather.getWeathersJp(), _weather.getWeathersEn());
-      //_disp.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
+      _disp.setWeatherForecast(_weather.getICONFilename(), _weather.getWeathersJp(), _weather.getWeathersEn());
+      _disp.sendMessage(MESSAGE::MSG_DISPLAY_FORECAST);
     }
   }
 
@@ -105,8 +108,8 @@ public:
         return;
       }
 
-      //_disp.setYMD(String(ymd));
-      //_disp.setNtpTime(String(time));
+      _disp.setYMD(String(ymd));
+      _disp.setNtpTime(String(time));
       //_disp.sendMessage(MESSAGE::MSG_DISPLAY_CLOCK);
     }
     _clock = false;
@@ -134,7 +137,7 @@ public:
 
     beginNtpClock();
 
-    //_disp.begin();
+    _disp.begin();
 
     timerCallback();
     log_d("Free Heap : %d", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
@@ -160,18 +163,18 @@ public:
       setNtpClock();
     }
 
-    //_disp.update();
+    _disp.update();
     delay(1);
   }
 
-private:
+ private:
   Ticker _serverChecker;
   Ticker _ntpclocker;
   Ticker _forecastChecker;
   Ticker _reboot;
 
   Connect _wifi;
-  // Display _disp;
+  Display _disp;
   Weather _weather;
 
   unsigned long _weatherStationChannelNumber;

@@ -3,7 +3,7 @@
 
 static Display _disp;
 
-void display_test_000(void){
+void display_test_000(void) {
   _disp.begin();
 }
 
