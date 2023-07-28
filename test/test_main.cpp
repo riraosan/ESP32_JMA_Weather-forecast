@@ -13,8 +13,8 @@
 #include <Weather.h>
 #include <Connect.h>
 
-#include "weatherTest.h"
-#include "displayTest.h"
+#include "./weatherTest.h"
+#include "./displayTest.h"
 
 Connect _wifi;
 
@@ -28,12 +28,12 @@ void tearDown(void) {
 }
 
 void connectWiFi(void) {
-  _wifi.setTaskName("AutoConnect");
-  _wifi.setTaskSize(4096 * 1);
-  _wifi.setTaskPriority(2);
-  _wifi.setCore(0);
+  //_wifi.setTaskName("AutoConnect");
+  //_wifi.setTaskSize(4096 * 1);
+  //_wifi.setTaskPriority(2);
+  //_wifi.setCore(0);
   _wifi.begin(SECRET_SSID, SECRET_PASS);
-  _wifi.start(nullptr);
+  //_wifi.start(nullptr);
 }
 
 void setup() {

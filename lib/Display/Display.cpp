@@ -3,8 +3,7 @@
 #include <esp32-hal-log.h>
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
-
-ESP32_8BIT_CVBS Display::_display;
+LGFX_8BIT_CVBS  Display::_display;
 M5Canvas        Display::_animation;
 
 File Display::_file;
