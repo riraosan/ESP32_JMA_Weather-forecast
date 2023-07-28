@@ -5,14 +5,14 @@
 #define NTP_SERVER2 "ntp.jst.mfeed.ad.jp"
 #define NTP_SERVER3 "asia.pool.ntp.org"
 
-//#define PHONE
+#define WORK
 
 #if defined(HOME)
 #define SECRET_SSID "your_ssid"
 #define SECRET_PASS "your_ap_password"
 #elif defined(WORK)
-#define SECRET_SSID "your_ssid"
-#define SECRET_PASS "your_ap_password"
+#define SECRET_SSID "Pilot-2133TR"
+#define SECRET_PASS "i9skzk5fsiac6p"
 #elif defined(PHONE)
 #define SECRET_SSID "your_ssid"
 #define SECRET_PASS "your_ap_password"
