@@ -56,15 +56,15 @@ void Display::begin(void) {
   _display.setRotation(0);
   _display.setColorDepth(8);
 
-  _animation.setPsram(false);
+  //_animation.setPsram(true);
   _animation.setColorDepth(8);
 
-  _data.setFont(&fonts::efontJA_16);
+  _data.setFont(&fonts::lgfxJapanGothic_16);
   _data.setTextWrap(true, true);
   _data.setPsram(false);
   _data.setColorDepth(8);
 
-  _title.setFont(&fonts::efontJA_16);
+  _title.setFont(&fonts::lgfxJapanGothic_16);
   _title.setTextWrap(true, true);
   _title.setPsram(false);
   _title.setColorDepth(8);
@@ -77,7 +77,7 @@ void Display::setWeatherInfo(float temperature, float humidity, float pressure, 
 }
 
 void Display::displayWeatherInfo(void) {
-  if (!_data.createSprite(174, 96)) {
+  if (!_data.createSprite(320, 96)) {
     log_e("data allocation failed");
     return;
   }
@@ -103,7 +103,7 @@ void Display::displayWeatherInfo(void) {
   _data.setCursor(0, 16 * 2);
   _data.setTextColor(0xFFFF, _bgColor);
   _data.setTextSize(1);
-  _data.print("  ");
+  _data.print("");
   _data.print(_forecastEN.c_str());
 
   // 気温
@@ -132,7 +132,7 @@ void Display::displayWeatherInfo(void) {
 
   log_d("%2.1f*C, %2.1f%%, %4.1fhPa", _temperature, _humidity, _pressure);
 
-  _data.pushSprite(&_display, 3, 125);
+  _data.pushSprite(&_display, 3, 125, _bgColor);
   _data.deleteSprite();
 }
 
@@ -170,7 +170,7 @@ void Display::update() {
       break;
     case MESSAGE::MSG_DISPLAY_FORECAST:
       displayIllustration();
-      // displayIcon();
+      displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -205,7 +205,7 @@ void Display::displayIcon(void) {
   _gif.close();
   _gif.reset();
 
-  _animation.pushSprite(&_display, 0, 33);
+  _animation.pushSprite(&_display, 20, 40);
   _animation.deleteSprite();
 }
 
@@ -280,7 +280,7 @@ int32_t Display::_GIFSeekFile(GIFFILE *pFile, int32_t iPosition) {
 
 void Display::_GIFDraw(GIFDRAW *pDraw) {
   uint8_t  *s;
-  uint16_t *d, *usPalette, usTemp[240];
+  uint16_t *d, *usPalette, usTemp[320];
   int       x, y, iWidth;
 
   iWidth = pDraw->iWidth;
@@ -323,9 +323,9 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
         }
       }              // while looking for opaque pixels
       if (iCount) {  // any opaque pixels?
-
-        _animation.setWindow(pDraw->iX + x, y, iCount, 1);
-        _animation.pushPixels((uint16_t *)usTemp, iCount, true);
+        for (int xOffset = 0; xOffset < iCount; xOffset++) {
+          _animation.drawPixel(x + xOffset, y, usTemp[xOffset]);
+        }
         x += iCount;
         iCount = 0;
       }
@@ -347,11 +347,8 @@ void Display::_GIFDraw(GIFDRAW *pDraw) {
   } else {
     s = pDraw->pPixels;
     // Translate the 8-bit pixels through the RGB565 palette (already byte reversed)
-    for (x = 0; x < iWidth; x++) {
-      usTemp[x] = usPalette[*s++];
+    for (x = 0; x < pDraw->iWidth; x++) {
+      _animation.drawPixel(x, y, usPalette[*s++]);
     }
-
-    _animation.setWindow(pDraw->iX, y, iWidth, 1);
-    _animation.pushPixels((uint16_t *)usTemp, iWidth, true);
   }
 }

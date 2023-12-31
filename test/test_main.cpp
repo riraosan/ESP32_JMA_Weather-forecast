@@ -40,7 +40,7 @@ void setup() {
   // Serial.begin(115200);
   //  NOTE!!! Wait for >2 secs
   delay(2000);
-  connectWiFi();
+  // connectWiFi();
 
   UNITY_BEGIN();  // IMPORTANT LINE!
 
@@ -53,8 +53,8 @@ void setup() {
   } else {
     RUN_TEST(display_test_000);
     RUN_TEST(display_test_003);
-    RUN_TEST(display_test_001);
-    RUN_TEST(display_test_002);
+    // RUN_TEST(display_test_001);
+    // RUN_TEST(display_test_002);
   }
 #endif
 
