@@ -8,7 +8,7 @@
 #include <ArduinoJson.h>
 #include <WeatherCode.h>
 #include <M5Unified.h>
-#include <ESP32_8BIT_CVBS.h>
+#include <LGFX_8BIT_CVBS.h>
 
 class Display {
  public:
@@ -64,8 +64,8 @@ class Display {
 
   static MESSAGE _message;
 
-  static ESP32_8BIT_CVBS _display;
-  static M5Canvas        _animation;
-  M5Canvas               _title;
-  M5Canvas               _data;
+  static LGFX_8BIT_CVBS _display;
+  static M5Canvas       _animation;
+  M5Canvas              _title;
+  M5Canvas              _data;
 };

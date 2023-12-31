@@ -4,8 +4,8 @@
 
 MESSAGE Display::_message = MESSAGE::MSG_NOTHING;
 
-ESP32_8BIT_CVBS Display::_display;
-M5Canvas        Display::_animation;
+LGFX_8BIT_CVBS Display::_display;
+M5Canvas       Display::_animation;
 
 File Display::_file;
 
@@ -140,7 +140,7 @@ void Display::update() {
   String format;
   switch (_message) {
     case MESSAGE::MSG_DISPLAY_CLOCK:
-      if (!_title.createSprite(239, 32)) {
+      if (!_title.createSprite(320, 32)) {
         log_e("title allocation failed");
         return;
       }
@@ -155,10 +155,10 @@ void Display::update() {
       format = _daytimeFormat;
       format.replace("__NTP__", _ntpTime);
       format.replace("__YMD__", _ymd);
-      _title.setCursor(16, 16 * 1);
+      _title.setCursor(96, 16 * 1);
       _title.print(format.c_str());
 
-      _title.pushSprite(&_display, 2, 9);
+      _title.pushSprite(&_display, 2, 0);
       _title.deleteSprite();
 
       sendMessage(MESSAGE::MSG_NOTHING);
@@ -170,7 +170,7 @@ void Display::update() {
       break;
     case MESSAGE::MSG_DISPLAY_FORECAST:
       displayIllustration();
-      displayIcon();
+      // displayIcon();
 
       sendMessage(MESSAGE::MSG_NOTHING);
       break;
@@ -229,7 +229,7 @@ void Display::displayIllustration(void) {
   _gif.close();
   _gif.reset();
 
-  _animation.pushSprite(&_display, 110, 50);
+  _animation.pushSprite(&_display, 180, 50);
   _animation.deleteSprite();
 }
 

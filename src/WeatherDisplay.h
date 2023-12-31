@@ -33,17 +33,12 @@ class WeatherDisplay {
     _message = message;
   }
 
-  static void setNtpTime(void) {
-    _clock = true;
-  }
-
   static void timerCallback(void) {
     sendMessage(MESSAGE::MSG_CHECK_FORECAST);
   }
 
   void beginNtpClock(void) {
     configTzTime(TIME_ZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
-    _ntpclocker.attach_ms(500, setNtpTime);
   }
 
   void setInformation(void) {
@@ -91,7 +86,7 @@ class WeatherDisplay {
     }
   }
 
-  void setNtpClock(void) {
+  int setNtpClock(void) {
     char        time[16] = {0};
     char        ymd[16]  = {0};
     const char *wday[]   = {"Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."};
@@ -100,19 +95,19 @@ class WeatherDisplay {
 
     if (getLocalTime(&info)) {
       sprintf(time, "%02d:%02d:%02d", info.tm_hour, info.tm_min, info.tm_sec);
-      sprintf(ymd, "%s %02d %02d %04d", wday[info.tm_wday], info.tm_mon + 1, info.tm_mday, info.tm_year + 1900);
+      sprintf(ymd, "%s %02d/%02d/%04d", wday[info.tm_wday], info.tm_mon + 1, info.tm_mday, info.tm_year + 1900);
 
       if (info.tm_hour == 23 && info.tm_min == 59 && info.tm_sec == 59) {
         ESP.restart();
         delay(1000);
-        return;
+        return info.tm_sec;
       }
 
       _disp.setYMD(String(ymd));
       _disp.setNtpTime(String(time));
-      //_disp.sendMessage(MESSAGE::MSG_DISPLAY_CLOCK);
     }
-    _clock = false;
+
+    return info.tm_sec;
   }
 
   void begin(void) {
@@ -147,11 +142,13 @@ class WeatherDisplay {
     switch (_message) {
       case MESSAGE::MSG_CHECK_DATA:
         setInformation();
+        _disp.update();
 
         sendMessage(MESSAGE::MSG_NOTHING);
         break;
       case MESSAGE::MSG_CHECK_FORECAST:
         setWeatherForecast();
+        _disp.update();
 
         sendMessage(MESSAGE::MSG_CHECK_DATA);
         break;
@@ -159,11 +156,13 @@ class WeatherDisplay {
         break;
     }
 
-    if (_clock) {
-      setNtpClock();
+    int nowsecond = setNtpClock();
+    if (nowsecond != _oldsecond) {
+      _oldsecond = nowsecond;
+      _disp.sendMessage(MESSAGE::MSG_DISPLAY_CLOCK);
+      _disp.update();
     }
 
-    _disp.update();
     delay(1);
   }
 
@@ -183,8 +182,8 @@ class WeatherDisplay {
   String        _ntpTime;
 
   static MESSAGE _message;
-  static bool    _clock;
+  static int     _oldsecond;
 };
 
-MESSAGE WeatherDisplay::_message = MESSAGE::MSG_NOTHING;
-bool    WeatherDisplay::_clock   = false;
+MESSAGE WeatherDisplay::_message   = MESSAGE::MSG_NOTHING;
+int     WeatherDisplay::_oldsecond = 0;
